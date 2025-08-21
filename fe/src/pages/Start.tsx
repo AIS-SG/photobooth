@@ -14,8 +14,8 @@ export default function Start() {
 
     {/* 오른쪽 1/3 영역 */}
     <div className="flex justify-center items-center w-1/3 h-full">
-        <p className="text-[#cfab8d] text-[40px] leading-[1.2] tracking-wide text-center whitespace-pre-line">
-        화<br />면<br />을<br /><br />터<br />치<br />해<br />주<br />세<br />요
+        <p className="text-[#cfab8d] text-[40px] font-[Hi_Melody] leading-[1.2] tracking-wide text-center  whitespace-pre-line">
+        화<br/>면<br />을<br /><br />터<br />치<br />해<br />주<br />세<br/>요
         </p>
     </div>
     </main>

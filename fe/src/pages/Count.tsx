@@ -27,7 +27,7 @@ export default function Count() {
             >
             <span className="text-3xl leading-none">&larr;</span>
             </button>
-            <h1 className="text-3xl font-semibold text-neutral-900">수량 선택</h1>
+            <h1 className="text-3xl font-semibold font-[Hi_Melody] text-neutral-900">수량 선택</h1>
             <div className="w-8" />
         </header>
 
@@ -41,14 +41,14 @@ export default function Count() {
             disabled={quantity <= MIN}
             aria-label="수량 감소"
             className="size-24 rounded-xl border border-neutral-300 bg-neutral-50
-                    hover:bg-neutral-100 disabled:opacity-40 text-4xl transition"
+                    hover:bg-neutral-100 disabled:opacity-40 text-4xl font-[Hi_Melody] transition"
         >
-            −
+            -
         </button>
 
         <div
             aria-live="polite"
-            className="min-w-32 text-center text-8xl font-light text-neutral-900 select-none"
+            className="min-w-32 text-center text-8xl font-light font-[Hi_Melody] text-neutral-900 select-none"
         >
             {quantity}
         </div>
@@ -58,7 +58,7 @@ export default function Count() {
             onClick={handleIncrease}
             aria-label="수량 증가"
             className="size-24 rounded-xl border border-neutral-300 bg-neutral-50
-                    hover:bg-neutral-100 disabled:opacity-40 text-4xl transition"
+                    hover:bg-neutral-100 disabled:opacity-40 text-4xl font-[Hi_Melody] transition"
         >
             +
         </button>
@@ -72,7 +72,7 @@ export default function Count() {
             onClick={() => navigate("/photostart")}
             className="px-12 h-18 rounded-xl border border-neutral-800 bg-[#cfab8d]
                         hover:brightness-95 active:scale-[0.98]
-                        text-neutral-900 text-xl font-medium transition"
+                        text-neutral-900 text-xl font-medium font-[Hi_Melody] transition"
             >
             Next
             </button>
