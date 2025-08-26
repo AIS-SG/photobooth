@@ -6,7 +6,7 @@ import { CountdownOverlay } from "../components/CountdownOverlay";
 
 export default function Photoselect() {
   const { sec } = useCountdown({
-        seconds: 120,
+        seconds: 10000,
         autostart: true,
         onExpire: () => navigate("/Qrcode", { replace: true }),
     });
@@ -58,11 +58,11 @@ export default function Photoselect() {
           <aside className="flex-[1] bg-[#e5e5e5] rounded-md p-6">
             <div className="grid grid-cols-2 grid-rows-2 gap-4 h-full">
               {sideIds.map(id => (
-                <button
+                <img
                   key={id}
-                  onClick={() => toggle(id)}
+                  
                   className={`w-full h-full bg-[#d9d9d9] border border-black
-                              hover:bg-[#cfcfcf] transition-colors
+                               transition-colors
                               ${selectedPhotos.has(id) ? "ring-4 ring-blue-500 ring-offset-2 ring-offset-[#e5e5e5]" : ""}`}
                   aria-pressed={selectedPhotos.has(id)}
                   aria-label={`사진 ${id} ${selectedPhotos.has(id) ? "해제" : "선택"}`}

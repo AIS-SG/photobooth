@@ -1,15 +1,33 @@
+import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useCountdown } from "../hooks/useCountdown";
 
 export default function Phototime() {
     const navigate = useNavigate();
-    const currentPhoto = 1; // 현재 촬영한 사진 번호
-    const totalPhotos = 8;  // 총 촬영할 사진 수
-    const { sec } = useCountdown({
-            seconds: 10,
-            autostart: true,
-            onExpire: () => navigate("/Phototime", { replace: true }),
-        });
+    const totalPhotos = 8;
+    const [currentPhoto, setCurrentPhoto] = useState(1);
+
+    // 최신 값 유지용 ref (onExpire 클로저 이슈 방지)
+    const currentRef = useRef(currentPhoto);
+    useEffect(() => { currentRef.current = currentPhoto; }, [currentPhoto]);
+
+    const { sec, start, reset } = useCountdown({
+        seconds: 10,
+        autostart: true,
+        onExpire: () => {
+        // 남은 컷이 있으면 타이머 재시작
+        if (currentRef.current < totalPhotos) {
+            setTimeout(() => {
+                setCurrentPhoto((p) => p + 1);
+                reset(10);   // 화면 숫자 10으로 세팅
+                start(10);   // 카운트다운 재시작
+            }, 2000);
+        } else {
+            // 모두 끝나면 다음 페이지로
+            navigate("/Frameselect", { replace: true });
+        }
+        },
+    });
     
     return (
         <div className="relative w-screen h-screen bg-[#CFAB8D]">

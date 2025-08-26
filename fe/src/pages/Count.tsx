@@ -7,7 +7,7 @@ import { CountdownOverlay } from "../components/CountdownOverlay";
 export default function Count() {
     const navigate = useNavigate();
     const MIN = 1;
-    const MAX = 12; // 최대 수량을 12로 설정
+    const MAX = 8; // 최대 수량을 8로 설정
 
     const [quantity, setQuantity] = useState<number>(4);
 
