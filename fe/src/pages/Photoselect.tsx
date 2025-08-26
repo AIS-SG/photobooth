@@ -1,7 +1,16 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { useCountdown } from "../hooks/useCountdown";
+import { CountdownOverlay } from "../components/CountdownOverlay";
+
 
 export default function Photoselect() {
+  const { sec } = useCountdown({
+        seconds: 120,
+        autostart: true,
+        onExpire: () => navigate("/Qrcode", { replace: true }),
+    });
+
   const navigate = useNavigate();
   const [selectedPhotos, setSelectedPhotos] = useState<Set<number>>(new Set());
 
@@ -76,6 +85,7 @@ export default function Photoselect() {
             Next
           </button>
         </div>
+        <CountdownOverlay remainingSec={sec} totalSec={120} label="자동으로 사진이 선택된 후, 인쇄됩니다." />
       </section>
     </div>
   );
