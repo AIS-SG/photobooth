@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { useCountdown } from "../hooks/useCountdown";
 import { CountdownOverlay } from "../components/CountdownOverlay";
 import { getSelectedFrame } from "../lib/selectFrame";
-
+import { ResponsivePhotoQuad} from "../components/ResponsivePhotoQuad";
 export default function Photoselect() {
   const { sec } = useCountdown({
         seconds: 10000,
@@ -141,43 +141,15 @@ export default function Photoselect() {
     style={{ width: frameW || 340, height: frameH || Math.round((340) * 1.5) }}
   >
 
-    {/* ✅ 프레임 이미지 */}<div
-      className="absolute inset-0 bg-center bg-no-repeat bg-contain z-0"
-      style={{ backgroundImage: `url(${frameImg})` }}
-      aria-hidden
+    <ResponsivePhotoQuad
+      className=""
+      frameImg={frameImg}
+      imgs={slots.map((id) => (id ? sortedPhotos[id - 1] : ""))}
+      fit="container"
+      maxWidthPx={frameW || 340}
+      headerOffsetPx={0}
     />
-    {/* ✅ 프레임 위에 2×2 슬롯 격자 오버레이 */}
-    <div className="absolute inset-0 grid grid-cols-2 grid-rows-2 gap-4 p-6">
-      {slots.map((maybeId, slotIdx) => {
-        const src = typeof maybeId === "number" ? sortedPhotos[maybeId - 1] : null;
-        return (
-          <div key={slotIdx} className="relative w-full h-full bg-[#d9d9d9]/80 border border-black/30 rounded overflow-hidden">
-            {/* 슬롯 라벨 */}
-            <span className="absolute top-2 left-2 text-xs font-bold bg-black/70 text-white rounded px-1.5 py-0.5">
-              {slotIdx + 1}
-            </span>
 
-            {src ? (
-              < >
-                <img src={src} className="w-full h-full object-cover" />
-                <button
-                  onClick={() => removeId(maybeId!)}
-                  className="absolute top-2 right-2 w-6 h-6 grid place-items-center rounded-full border border-white/70 bg-black/70 text-white text-xs hover:bg-black"
-                  aria-label={`${slotIdx + 1}번 슬롯에서 사진 제거`}
-                  title="제거"
-                >
-                  ×
-                </button>
-              </>
-            ) : (
-              <div className="w-full h-full grid place-items-center text-neutral-600 text-sm">
-                빈 슬롯
-              </div>
-            )}
-          </div>
-        );
-      })}
-    </div>
   </div>
 </aside>
 

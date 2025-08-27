@@ -1,4 +1,3 @@
-// /fe/src/components/CountdownOverlay.tsx
 import React from "react";
 
 export function CountdownOverlay({
