@@ -138,16 +138,23 @@ export default function Photoselect() {
   {/* ✅ 2:3 비율 고정 박스 */}
   <div
     className="relative aspect-[2/3] shrink-0 overflow-hidden rounded-xl mx-auto"
-    style={{ width: frameW || 340, height: frameH || Math.round((340) * 1.5) }}
-  >
+    style={{ width: frameW || 340, height: frameH || Math.round((340) * 1.5) }}>
 
     <ResponsivePhotoQuad
-      className=""
-      frameImg={frameImg}
-      imgs={slots.map((id) => (id ? sortedPhotos[id - 1] : ""))}
+      design={{ w: 1000, h: 1500 }}
+      base={{ x: 50, y: 220, w: 410, h: 600 }}
+      gap={{ x: 70, y: 45 }}
+      count={4}
+      slots={slots}                
+      photos={sortedPhotos}
       fit="container"
       maxWidthPx={frameW || 340}
-      headerOffsetPx={0}
+      showEmptyGuide={true}
+      showSlotLabel={true}
+      showRemoveButton={true}
+      onRemove={(slotIdx, photoId) => {
+        removeId(photoId);
+      }}
     />
 
   </div>
