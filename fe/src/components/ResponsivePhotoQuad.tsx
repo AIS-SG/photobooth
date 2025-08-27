@@ -86,7 +86,7 @@ export function ResponsivePhotoQuad({
       ? { width: `min(100vw, calc((2 / 3) * (100dvh - ${headerOffsetPx}px)))` }
       : { maxWidth: maxWidthPx, width: "100%" };
 
-  const containerClass = `relative aspect-[2/3] overflow-hidden rounded border border-neutral-300 ${className}`;
+  const containerClass = `relative aspect-[2/3] overflow-hidden  border border-neutral-300 ${className}`;
 
   return (
     <div className={fit === "viewport" ? "w-screen h-screen overflow-hidden grid place-items-center" : ""}>
@@ -102,18 +102,17 @@ export function ResponsivePhotoQuad({
             width: `${toPct.w(r.w)}%`,
             height: `${toPct.h(r.h)}%`,
             overflow: "hidden",
-            borderRadius: 8,
           };
 
           return (
             <div
               key={slotIdx}
               style={slotStyle}
-              className={`relative ${src ? "" : "bg-[#d9d9d9]/80 border border-black/30"} rounded`}
+              className={`relative ${src ? "" : "bg-[#d9d9d9]/80 border border-black/30"} `}
             >
               {/* 슬롯 라벨 */}
               {showSlotLabel && (
-                <span className="absolute top-2 left-2 text-xs font-bold bg-black/70 text-white rounded px-1.5 py-0.5">
+                <span className="absolute top-2 left-2 text-xs font-bold bg-black/70 text-white  px-1.5 py-0.5">
                   {slotIdx + 1}
                 </span>
               )}
@@ -124,7 +123,7 @@ export function ResponsivePhotoQuad({
                   {showRemoveButton && typeof maybeId === "number" && (
                     <button
                       onClick={() => onRemove?.(slotIdx, maybeId)}
-                      className="absolute top-2 right-2 w-6 h-6 grid place-items-center rounded-full border border-white/70 bg-black/70 text-white text-xs hover:bg-black"
+                      className="absolute top-2 right-2 w-6 h-6 grid place-items-center  border border-white/70 bg-black/70 text-white text-xs hover:bg-black"
                       aria-label={`${slotIdx + 1}번 슬롯에서 사진 제거`}
                       title="제거"
                       type="button"

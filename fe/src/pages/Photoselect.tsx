@@ -4,9 +4,11 @@ import { useCountdown } from "../hooks/useCountdown";
 import { CountdownOverlay } from "../components/CountdownOverlay";
 import { getSelectedFrame } from "../lib/selectFrame";
 import { ResponsivePhotoQuad} from "../components/ResponsivePhotoQuad";
+import { saveComposedQuadAsFile } from "../lib/composePhotoQuad";
+
 export default function Photoselect() {
   const { sec } = useCountdown({
-        seconds: 10000,
+        seconds: 100,
         autostart: true,
         onExpire: () => navigate("/Qrcode", { replace: true }),
     });
@@ -82,7 +84,7 @@ export default function Photoselect() {
   return (
     <div className="relative w-screen h-screen bg-[#CFAB8D]">
       {/* 흰색 인셋 박스 */}
-      <section className="absolute inset-[5%] bg-white rounded-2xl shadow-sm border border-neutral-200 flex flex-col p-8 ">
+      <section className="absolute inset-[5%] bg-white rounded-2xl shadow-sm border border-neutral-200 flex flex-col p-6 ">
 
         {/* 상단 타이틀 + 카운터 */}
         <div className="flex items-end justify-between gap-4">
@@ -94,7 +96,7 @@ export default function Photoselect() {
         </div>
 
         {/* 본문: 좌측 그리드 + 우측 선택결과 패널 */}
-        <div className="flex-1 mt-8 flex gap-12 min-h-0 min-w-0 items-start ">
+        <div className="shrink-container flex gap-12">
           {/* 좌측: 4×2 - 전체 후보 목록 */}
           <div className="flex-[2] min-w-0">
             <div className="grid grid-cols-4 gap-4">
@@ -105,14 +107,14 @@ export default function Photoselect() {
                   <button
                     key={id}
                     onClick={() => toggleFromLeftGrid(id)}
-                    className="relative w-full h-full rounded overflow-hidden group"
+                    className="relative w-full h-full  overflow-hidden group"
                     aria-pressed={selectedIndex !== -1}
                     aria-label={`사진 ${id} ${selectedIndex !== -1 ? "해제" : "선택"}`}
                   >
                     {/* 2:3 고정 박스 — 여기의 실제 너비를 측정 */}
                     <div
                       ref={idx === 0 ? firstTileRef : undefined}
-                      className="relative w-full aspect-[2/3] rounded border border-black bg-[#d9d9d9] overflow-hidden"
+                      className="relative w-full aspect-[2/3] border border-black bg-[#d9d9d9] overflow-hidden"
                     >
                       <img src={src} className="absolute inset-0 w-full h-full object-cover" />
                       {selectedIndex !== -1 && (
@@ -134,48 +136,59 @@ export default function Photoselect() {
 
           {/* 우측: ✅ 선택 결과 (슬롯 1~4를 순서대로 표시, 중간 삭제 시 빈 칸 유지) */}
           
-<aside className="flex-[1] min-w-0">
-  {/* ✅ 2:3 비율 고정 박스 */}
-  <div
-    className="relative aspect-[2/3] shrink-0 overflow-hidden rounded-xl mx-auto"
-    style={{ width: frameW || 340, height: frameH || Math.round((340) * 1.5) }}>
+        <aside className="flex-[1] min-w-0 flex justify-center items-start">
+          {/* ✅ 2:3 비율 고정 박스 */}
+          {(() => {
+            const previewW = Math.min(frameW || 340, 420); // ← 최대 폭 캡(원하는 값으로 조정)
+            return (
+              <div
+                className="relative aspect-[2/3] overflow-hidden  mx-auto max-w-full"
+                style={{ width: previewW }}   
+              >
+                <ResponsivePhotoQuad
+                  count={4}
+                  slots={slots}
+                  photos={sortedPhotos}
+                  fit="container"
+                  maxWidthPx={previewW}        
+                  showEmptyGuide
+                  showSlotLabel
+                  showRemoveButton
+                  onRemove={(_slotIdx, photoId) => removeId(photoId)}
+                />
+              </div>
+            );
+          })()}
+        </aside>
 
-    <ResponsivePhotoQuad
-      design={{ w: 1000, h: 1500 }}
-      base={{ x: 50, y: 220, w: 410, h: 600 }}
-      gap={{ x: 70, y: 45 }}
-      count={4}
-      slots={slots}                
-      photos={sortedPhotos}
-      fit="container"
-      maxWidthPx={frameW || 340}
-      showEmptyGuide={true}
-      showSlotLabel={true}
-      showRemoveButton={true}
-      onRemove={(slotIdx, photoId) => {
-        removeId(photoId);
-      }}
-    />
-
-  </div>
-</aside>
-
-        </div>
+      </div>
 
         {/* 하단: Next (정확히 4장일 때만 활성화) */}
-        <div className="mt-8 flex justify-end  relative z-10">
-          <button
-            onClick={() => isExactFour && navigate("/Qrcode", { state: { selectedOrder: slots }, replace: true })}
-            disabled={!isExactFour}
-            className="px-8 h-14 rounded-xl border border-black bg-[#cfab8d]
-                       text-[32px] font-['Hi_Melody'] text-black
-                       hover:brightness-95 disabled:opacity-50 transition"
-            aria-label="다음 단계로 이동"
-          >
-            Next
-          </button>
-        </div>
-        <CountdownOverlay remainingSec={sec} totalSec={10} label="자동으로 선택되고 넘어갑니다."/>
+        {isExactFour && (
+          <div className="absolute right-8 bottom-8 z-20">
+            <button
+              type="button"
+              onClick={async () => {
+                try {
+                  const frameImg = getSelectedFrame() ?? "";
+                  await saveComposedQuadAsFile(
+                    { slots, photos: sortedPhotos, frameImg },              
+                    { format: "png", filename: "photocard.png" } 
+                  );
+                  navigate("/Qrcode", { state: { selectedOrder: slots }, replace: true });
+                } catch (e) {
+                  console.error(e);
+                  // 필요하면 토스트 등으로 오류 표시
+                }
+              }}
+              className="px-8 h-14 rounded-xl border border-black bg-[#cfab8d]
+                        text-[32px] font-['Hi_Melody'] text-black
+                        hover:brightness-95 transition"
+              aria-label="다음 단계로 이동">
+                Next</button>
+          </div>
+        )}
+        <CountdownOverlay remainingSec={sec} totalSec={10} label="자동으로 선택되고 넘어갑니다." opacity={0.5}/>
       </section>
     </div>
   );
