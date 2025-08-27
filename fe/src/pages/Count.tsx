@@ -1,18 +1,21 @@
 import { useNavigate } from "react-router-dom";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useCountdown } from "../hooks/useCountdown";
 import { CountdownOverlay } from "../components/CountdownOverlay";
-
+import { getQuantity, setQuantity } from "../lib/quantity";
 
 export default function Count() {
     const navigate = useNavigate();
     const MIN = 1;
     const MAX = 8; // 최대 수량을 8로 설정
+    
+    const [quantity, updateQuantity] = useState(getQuantity());
+    useEffect(() => {
+        setQuantity(quantity); 
+    }, [quantity]);
 
-    const [quantity, setQuantity] = useState<number>(4);
-
-    const handleDecrease = () => setQuantity((v) => Math.max(MIN, v - 1));
-    const handleIncrease = () => setQuantity((v) => Math.min(MAX, v + 1));
+    const handleDecrease = () => updateQuantity((v) => Math.max(MIN, v - 1));
+    const handleIncrease = () => updateQuantity((v) => Math.min(MAX, v + 1));
 
     const handleBack = () => navigate(-1);
 

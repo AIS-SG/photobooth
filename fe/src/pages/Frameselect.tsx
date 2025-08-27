@@ -1,20 +1,31 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import basic1 from "../img/basic-1.png";
-import basic2 from "../img/basic-2.png";
-import event1 from "../img/event-1.png";
-import event2 from "../img/event-2.png";
-
+import { useCountdown } from "../hooks/useCountdown";
+import { CountdownOverlay } from "../components/CountdownOverlay";
+import {getSelectedFrame, setSelectedFrame} from "../lib/selectFrame";
+import basic1 from "../img/frame/basic-1.png";
+import basic2 from "../img/frame/basic-2.png";
+import event1 from "../img/frame/event-1.png";
+import event2 from "../img/frame/event-2.png";
 
 export default function Frameselect() {
   const navigate = useNavigate();
-  const [selectedFrame, setSelectedFrame] = useState<string | null>(null);
+  
+  const [selectedFrame, updateSelectedFrame] = useState<string | null>(getSelectedFrame());
+  useEffect(() => {
+    setSelectedFrame(selectedFrame);
+  }, [selectedFrame]);
 
   const frameTypes: { id: string; label: string; options: string[] }[] = [
     { id: "basic", label: "기본", options: [basic1, basic2] },
     { id: "event", label: "이벤트", options: [event1, event2] },
   ];
-
+  
+  const { sec } = useCountdown({
+        seconds: 100,
+        autostart: true,
+        onExpire: () => {navigate("/Loading", { replace: true });},
+    });
   return (
     <div className="min-h-screen w-screen bg-[#CFAB8D] grid place-items-center">
       {/* 흰 캔버스 */}
@@ -70,17 +81,15 @@ export default function Frameselect() {
 
                   <div className="flex gap-[clamp(12px,2vw,24px)]">
                     {t.options.map((opt) => {
-                      const selected = selectedFrame === opt;
+                      const isSelected = selectedFrame === opt;
                       return (
                         <button
                           key={opt}
                           type="button"
-                          onClick={() => setSelectedFrame(opt)}
-                          aria-pressed={selected}
-                          aria-label={`${t.label} ${opt}`}
+                          onClick={() => updateSelectedFrame(opt)} 
                           className={[
                             "rounded-full border-4 transition-all size-[clamp(64px,8vw,120px)]",
-                            selected
+                            isSelected
                               ? "bg-[#b9b9b9] border-blue-500 shadow-[0_0_0_6px_rgba(79,140,255,0.25)]"
                               : "bg-[#d9d9d9] border-transparent hover:bg-[#c9c9c9]",
                           ].join(" ")}
@@ -109,6 +118,7 @@ export default function Frameselect() {
           </button>
         </footer>
       </section>
+      <CountdownOverlay remainingSec={sec} totalSec={10} label="자동으로 선택되고 넘어갑니다." />
     </div>
   );
 }
