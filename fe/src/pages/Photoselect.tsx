@@ -82,7 +82,7 @@ export default function Photoselect() {
   return (
     <div className="relative w-screen h-screen bg-[#CFAB8D]">
       {/* 흰색 인셋 박스 */}
-      <section className="absolute inset-[5%] bg-white rounded-2xl shadow-sm border border-neutral-200 flex flex-col p-8 overflow-auto md:overflow-visible">
+      <section className="absolute inset-[5%] bg-white rounded-2xl shadow-sm border border-neutral-200 flex flex-col p-8 ">
 
         {/* 상단 타이틀 + 카운터 */}
         <div className="flex items-end justify-between gap-4">
@@ -94,7 +94,7 @@ export default function Photoselect() {
         </div>
 
         {/* 본문: 좌측 그리드 + 우측 선택결과 패널 */}
-        <div className="flex-1 mt-8 flex gap-12 min-h-0 min-w-0 items-start overflow-auto">
+        <div className="flex-1 mt-8 flex gap-12 min-h-0 min-w-0 items-start ">
           {/* 좌측: 4×2 - 전체 후보 목록 */}
           <div className="flex-[2] min-w-0">
             <div className="grid grid-cols-4 gap-4">
@@ -196,7 +196,7 @@ export default function Photoselect() {
             Next
           </button>
         </div>
-        <CountdownOverlay remainSec={sec} totalSec={10} label="자동으로 선택되고 넘어갑니다."/>
+        <CountdownOverlay remainingSec={sec} totalSec={10} label="자동으로 선택되고 넘어갑니다."/>
       </section>
     </div>
   );

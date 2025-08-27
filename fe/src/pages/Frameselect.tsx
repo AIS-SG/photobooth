@@ -78,7 +78,6 @@ export default function Frameselect() {
                   <h2 className='font-["Hi_Melody"] text-[clamp(18px,2.5vw,28px)]'>
                     {t.label}
                   </h2>
-
                   <div className="flex gap-[clamp(12px,2vw,24px)]">
                     {t.options.map((opt) => {
                       const isSelected = selectedFrame === opt;
@@ -88,11 +87,12 @@ export default function Frameselect() {
                           type="button"
                           onClick={() => updateSelectedFrame(opt)} 
                           className={[
-                            "rounded-full border-4 transition-all size-[clamp(64px,8vw,120px)]",
+                            "rounded-full border-4 transition-all size-[clamp(64px,8vw,120px)] ",
                             isSelected
                               ? "bg-[#b9b9b9] border-blue-500 shadow-[0_0_0_6px_rgba(79,140,255,0.25)]"
-                              : "bg-[#d9d9d9] border-transparent hover:bg-[#c9c9c9]",
+                              : "border-2 border-gray-300 hover:border-gray-400",
                           ].join(" ")}
+                          style={{ backgroundImage: `url(${opt})` }} 
                         />
                       );
                     })}
