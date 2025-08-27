@@ -8,6 +8,7 @@ import Loading from "../pages/Loading";
 import Photoselect from "../pages/Photoselect";
 import Qrcode from "../pages/Qrcode";
 import Finish from "../pages/Finish"; 
+import Photo from "../pages/Photo";
 
 
 export const router = createBrowserRouter([
@@ -20,6 +21,7 @@ export const router = createBrowserRouter([
     {path: "/photoselect", element: <Photoselect />},
     {path: "/qrcode", element: <Qrcode />},
     {path: "/finish", element: <Finish />},
+    {path: "/photo", element: <Photo />},
 ]);
 
 export default function AppRouter(){

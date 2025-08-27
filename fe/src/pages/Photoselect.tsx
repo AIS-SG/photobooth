@@ -3,10 +3,12 @@ import { useNavigate } from "react-router-dom";
 import { useCountdown } from "../hooks/useCountdown";
 import { CountdownOverlay } from "../components/CountdownOverlay";
 import { getSelectedFrame } from "../lib/selectFrame";
+import { ResponsivePhotoQuad} from "../components/ResponsivePhotoQuad";
+import { saveComposedQuadAsFile } from "../lib/composePhotoQuad";
 
 export default function Photoselect() {
   const { sec } = useCountdown({
-        seconds: 10000,
+        seconds: 100,
         autostart: true,
         onExpire: () => navigate("/Qrcode", { replace: true }),
     });
@@ -82,7 +84,7 @@ export default function Photoselect() {
   return (
     <div className="relative w-screen h-screen bg-[#CFAB8D]">
       {/* 흰색 인셋 박스 */}
-      <section className="absolute inset-[5%] bg-white rounded-2xl shadow-sm border border-neutral-200 flex flex-col p-8 ">
+      <section className="absolute inset-[5%] bg-white rounded-2xl shadow-sm border border-neutral-200 flex flex-col p-6 ">
 
         {/* 상단 타이틀 + 카운터 */}
         <div className="flex items-end justify-between gap-4">
@@ -94,7 +96,7 @@ export default function Photoselect() {
         </div>
 
         {/* 본문: 좌측 그리드 + 우측 선택결과 패널 */}
-        <div className="flex-1 mt-8 flex gap-12 min-h-0 min-w-0 items-start ">
+        <div className="shrink-container flex gap-12">
           {/* 좌측: 4×2 - 전체 후보 목록 */}
           <div className="flex-[2] min-w-0">
             <div className="grid grid-cols-4 gap-4">
@@ -105,14 +107,14 @@ export default function Photoselect() {
                   <button
                     key={id}
                     onClick={() => toggleFromLeftGrid(id)}
-                    className="relative w-full h-full rounded overflow-hidden group"
+                    className="relative w-full h-full  overflow-hidden group"
                     aria-pressed={selectedIndex !== -1}
                     aria-label={`사진 ${id} ${selectedIndex !== -1 ? "해제" : "선택"}`}
                   >
                     {/* 2:3 고정 박스 — 여기의 실제 너비를 측정 */}
                     <div
                       ref={idx === 0 ? firstTileRef : undefined}
-                      className="relative w-full aspect-[2/3] rounded border border-black bg-[#d9d9d9] overflow-hidden"
+                      className="relative w-full aspect-[2/3] border border-black bg-[#d9d9d9] overflow-hidden"
                     >
                       <img src={src} className="absolute inset-0 w-full h-full object-cover" />
                       {selectedIndex !== -1 && (
@@ -134,69 +136,59 @@ export default function Photoselect() {
 
           {/* 우측: ✅ 선택 결과 (슬롯 1~4를 순서대로 표시, 중간 삭제 시 빈 칸 유지) */}
           
-<aside className="flex-[1] min-w-0">
-  {/* ✅ 2:3 비율 고정 박스 */}
-  <div
-    className="relative aspect-[2/3] shrink-0 overflow-hidden rounded-xl mx-auto"
-    style={{ width: frameW || 340, height: frameH || Math.round((340) * 1.5) }}
-  >
-
-    {/* ✅ 프레임 이미지 */}<div
-      className="absolute inset-0 bg-center bg-no-repeat bg-contain z-0"
-      style={{ backgroundImage: `url(${frameImg})` }}
-      aria-hidden
-    />
-    {/* ✅ 프레임 위에 2×2 슬롯 격자 오버레이 */}
-    <div className="absolute inset-0 grid grid-cols-2 grid-rows-2 gap-4 p-6">
-      {slots.map((maybeId, slotIdx) => {
-        const src = typeof maybeId === "number" ? sortedPhotos[maybeId - 1] : null;
-        return (
-          <div key={slotIdx} className="relative w-full h-full bg-[#d9d9d9]/80 border border-black/30 rounded overflow-hidden">
-            {/* 슬롯 라벨 */}
-            <span className="absolute top-2 left-2 text-xs font-bold bg-black/70 text-white rounded px-1.5 py-0.5">
-              {slotIdx + 1}
-            </span>
-
-            {src ? (
-              < >
-                <img src={src} className="w-full h-full object-cover" />
-                <button
-                  onClick={() => removeId(maybeId!)}
-                  className="absolute top-2 right-2 w-6 h-6 grid place-items-center rounded-full border border-white/70 bg-black/70 text-white text-xs hover:bg-black"
-                  aria-label={`${slotIdx + 1}번 슬롯에서 사진 제거`}
-                  title="제거"
-                >
-                  ×
-                </button>
-              </>
-            ) : (
-              <div className="w-full h-full grid place-items-center text-neutral-600 text-sm">
-                빈 슬롯
+        <aside className="flex-[1] min-w-0 flex justify-center items-start">
+          {/* ✅ 2:3 비율 고정 박스 */}
+          {(() => {
+            const previewW = Math.min(frameW || 340, 420); // ← 최대 폭 캡(원하는 값으로 조정)
+            return (
+              <div
+                className="relative aspect-[2/3] overflow-hidden  mx-auto max-w-full"
+                style={{ width: previewW }}   
+              >
+                <ResponsivePhotoQuad
+                  count={4}
+                  slots={slots}
+                  photos={sortedPhotos}
+                  fit="container"
+                  maxWidthPx={previewW}        
+                  showEmptyGuide
+                  showSlotLabel
+                  showRemoveButton
+                  onRemove={(_slotIdx, photoId) => removeId(photoId)}
+                />
               </div>
-            )}
-          </div>
-        );
-      })}
-    </div>
-  </div>
-</aside>
+            );
+          })()}
+        </aside>
 
-        </div>
+      </div>
 
         {/* 하단: Next (정확히 4장일 때만 활성화) */}
-        <div className="mt-8 flex justify-end  relative z-10">
-          <button
-            onClick={() => isExactFour && navigate("/Qrcode", { state: { selectedOrder: slots }, replace: true })}
-            disabled={!isExactFour}
-            className="px-8 h-14 rounded-xl border border-black bg-[#cfab8d]
-                       text-[32px] font-['Hi_Melody'] text-black
-                       hover:brightness-95 disabled:opacity-50 transition"
-            aria-label="다음 단계로 이동"
-          >
-            Next
-          </button>
-        </div>
-        <CountdownOverlay remainingSec={sec} totalSec={10} label="자동으로 선택되고 넘어갑니다."/>
+        {isExactFour && (
+          <div className="absolute right-8 bottom-8 z-20">
+            <button
+              type="button"
+              onClick={async () => {
+                try {
+                  const frameImg = getSelectedFrame() ?? "";
+                  await saveComposedQuadAsFile(
+                    { slots, photos: sortedPhotos, frameImg },              
+                    { format: "png", filename: "photocard.png" } 
+                  );
+                  navigate("/Qrcode", { state: { selectedOrder: slots }, replace: true });
+                } catch (e) {
+                  console.error(e);
+                  // 필요하면 토스트 등으로 오류 표시
+                }
+              }}
+              className="px-8 h-14 rounded-xl border border-black bg-[#cfab8d]
+                        text-[32px] font-['Hi_Melody'] text-black
+                        hover:brightness-95 transition"
+              aria-label="다음 단계로 이동">
+                Next</button>
+          </div>
+        )}
+        <CountdownOverlay remainingSec={sec} totalSec={10} label="자동으로 선택되고 넘어갑니다." opacity={0.5}/>
       </section>
     </div>
   );
