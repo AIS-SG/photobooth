@@ -1,24 +1,34 @@
+import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { useCountdown } from "../hooks/useCountdown";
 
 export default function Phototime() {
     const navigate = useNavigate();
-    {/* 카운트 다운 시간 설정
-    const [time, setTime] = useState(80); // 초기 카운트다운 시간
+    const totalPhotos = 8;
+    const [currentPhoto, setCurrentPhoto] = useState(1);
 
-    useEffect(() => {
-        if (time <= 0) {
-        navigate("/Frameselect"); // 0초 되면 다음 페이지로 이동
-        return;
+    // 최신 값 유지용 ref (onExpire 클로저 이슈 방지)
+    const currentRef = useRef(currentPhoto);
+    useEffect(() => { currentRef.current = currentPhoto; }, [currentPhoto]);
+
+    const { sec, start, reset } = useCountdown({
+        seconds: 10,
+        autostart: true,
+        onExpire: () => {
+        // 남은 컷이 있으면 타이머 재시작
+        if (currentRef.current < totalPhotos) {
+            setTimeout(() => {
+                setCurrentPhoto((p) => p + 1);
+                reset(10);   // 화면 숫자 10으로 세팅
+                start(10);   // 카운트다운 재시작
+            }, 2000);
+        } else {
+            // 모두 끝나면 다음 페이지로
+            navigate("/Frameselect", { replace: true });
         }
-
-        // 1초마다 time 감소
-        const timer = setInterval(() => {
-        setTime((prev) => prev - 1);
-        }, 1000);
-
-        return () => clearInterval(timer); // 언마운트 시 정리
-    }, [time, navigate]);
-    */}
+        },
+    });
+    
     return (
         <div className="relative w-screen h-screen bg-[#CFAB8D]">
             {/* 전체를 좌측 큰 영역 / 우측 표시 영역으로 나눈다 */}
@@ -35,10 +45,10 @@ export default function Phototime() {
                 {/* 우측: 진행 정보 */}
                 <aside className="relative flex flex-col items-center pt-20 pr-10">
                 <div className="text-white text-[96px] leading-none font-['Hi_Melody']">
-                    1 / 8
+                    {currentPhoto} / {totalPhotos}
                 </div>
                 <div className="mt-12 text-white text-[96px] leading-none font-['Hi_Melody']">
-                    80초
+                    {sec}초
                 </div>
                 {/*<div className="mt-12 text-white text-[96px] leading-none font-['Hi_Melody']">
                     {time}초

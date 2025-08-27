@@ -1,4 +1,4 @@
-import { createBrowserRouter } from "react-router-dom";
+import { createBrowserRouter, RouterProvider } from "react-router-dom";
 import Start from "../pages/Start";
 import Count from "../pages/Count";
 import Photostart from "../pages/PhotoStart";
@@ -22,3 +22,6 @@ export const router = createBrowserRouter([
     {path: "/finish", element: <Finish />},
 ]);
 
+export default function AppRouter(){
+    return <RouterProvider router={router} />;
+}

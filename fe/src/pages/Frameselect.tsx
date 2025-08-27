@@ -1,15 +1,31 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import { useCountdown } from "../hooks/useCountdown";
+import { CountdownOverlay } from "../components/CountdownOverlay";
+import {getSelectedFrame, setSelectedFrame} from "../lib/selectFrame";
+import basic1 from "../img/frame/basic-1.png";
+import basic2 from "../img/frame/basic-2.png";
+import event1 from "../img/frame/event-1.png";
+import event2 from "../img/frame/event-2.png";
 
 export default function Frameselect() {
   const navigate = useNavigate();
-  const [selectedFrame, setSelectedFrame] = useState<string | null>(null);
+  
+  const [selectedFrame, updateSelectedFrame] = useState<string | null>(getSelectedFrame());
+  useEffect(() => {
+    setSelectedFrame(selectedFrame);
+  }, [selectedFrame]);
 
-  const frameTypes = [
-    { id: "basic", label: "기본", options: ["basic-1", "basic-2"] },
-    { id: "event", label: "이벤트", options: ["event-1", "event-2"] },
+  const frameTypes: { id: string; label: string; options: string[] }[] = [
+    { id: "basic", label: "기본", options: [basic1, basic2] },
+    { id: "event", label: "이벤트", options: [event1, event2] },
   ];
-
+  
+  const { sec } = useCountdown({
+        seconds: 100,
+        autostart: true,
+        onExpire: () => {navigate("/Loading", { replace: true });},
+    });
   return (
     <div className="min-h-screen w-screen bg-[#CFAB8D] grid place-items-center">
       {/* 흰 캔버스 */}
@@ -17,8 +33,7 @@ export default function Frameselect() {
         className="
           relative bg-white border-4 border-black rounded-2xl
           w-[min(90vw,1400px)] h-[min(90vh,900px)]
-          p-[clamp(16px,2.5vw,32px)] flex flex-col
-          overflow-hidden 
+          p-[clamp(16px,2.5vw,32px)] flex flex-col 
         "
       >
         {/* 상단 */}
@@ -27,72 +42,64 @@ export default function Frameselect() {
             onClick={() => navigate(-1)}
             aria-label="이전 페이지로 돌아가기"
             className="text-neutral-400 hover:text-neutral-700 transition"
-            >
+          >
             <span className="text-3xl leading-none">&larr;</span>
-            </button>
-          <h1 className='font-["Hi_Melody"] text-black leading-none
-                         text-[clamp(24px,3.2vw,40px)]'>
+          </button>
+          <h1 className='font-["Hi_Melody"] text-black leading-none text-[clamp(24px,3.2vw,40px)]'>
             프레임 선택
           </h1>
         </header>
 
-        {/* 본문 */}
+        {/* 본문: 항상 2열 유지 (왼쪽 고정폭 + 오른쪽 가변폭) */}
         <main
-          className="
-            flex-1 grid gap-[clamp(16px,2vw,32px)] mt-[clamp(12px,1.5vw,20px)]
-            grid-cols-1 lg:grid-cols-[2fr_1fr]
-            min-h-0   
-          "
-        >
-          {/* ⬅️ 왼쪽: 프리뷰 */}
-          <div className="min-h-0 flex items-center justify-center">
-            <div
-              className="
-                relative w-full max-w-[500px]   /* 가로는 부모 안에서만 */
-                /* 세로 비율은 상황에 맞게 골라주세요: 세로형이면 9/16, 가로형이면 4/3 */
-              "
-            >
-              <div
-                className="
-                  bg-[#d9d9d9] rounded-md border border-neutral-300
-                  w-full max-h-[calc(100vh)]  /* 화면 높이 넘지 않게 안전장치 */
-                  aspect-[4/3]                /* ✅ 가로형 예시 (원하면 9/16로 변경) */
-                "
-                role="img"
-                aria-label="프레임 미리보기"
-              />
+          className="flex-1 min-h-0 mt-[clamp(12px,1.5vw,20px)] grid grid-cols-2">
+          {/* ⬅️ 왼쪽: 프리뷰 (반응형 고정폭 + 왼쪽만 살짝 들여쓰기) */}
+          <section className="flex justify-center items-center">
+            {/* 2:3 비율 고정 박스 */}
+            <div className="relative aspect-[2/3] w-[clamp(200px,25vw,380px)] rounded-md border border-neutral-300 bg-[#d9d9d9] overflow-hidden">
+                <img
+                  src={selectedFrame ?? ""} 
+                  alt="프레임 미리보기"
+                  className="block h-full w-full object-contain"
+                  draggable={false}
+                  // 이미지 없거나 깨질 때 레이아웃 유지
+                  onError={(e) => {
+                    (e.currentTarget as HTMLImageElement).style.visibility = "hidden";
+                  }}
+                />
             </div>
-          </div>
+          </section>
 
-          {/* ➡️ 오른쪽: 옵션 */}
-          <aside className="min-h-0 flex flex-col justify-center gap-[clamp(16px,3vw,32px)]">
-            {frameTypes.map((t) => (
-              <div key={t.id} className="flex flex-col gap-[clamp(8px,1.5vw,16px)]">
-                <h2 className='font-["Hi_Melody"] text-[clamp(18px,2.5vw,28px)]'>
-                  {t.label}
-                </h2>
-                <div className="flex gap-[clamp(12px,2vw,24px)]">
-                  {t.options.map((opt) => {
-                    const selected = selectedFrame === opt;
-                    return (
-                      <button
-                        key={opt}
-                        onClick={() => setSelectedFrame(opt)}
-                        aria-pressed={selected}
-                        aria-label={`${t.label} ${opt}`}
-                        className={`
-                          rounded-full border-4 transition-all
-                          size-[clamp(64px,8vw,120px)]
-                          ${selected
-                            ? "bg-[#b9b9b9] border-blue-500 shadow-[0_0_0_6px_rgba(79,140,255,0.25)]"
-                            : "bg-[#d9d9d9] border-transparent hover:bg-[#c9c9c9]"}
-                        `}
-                      />
-                    );
-                  })}
+          {/* ➡️ 오른쪽: 옵션 (오버플로 방지 + 내부 폭 제한) */}
+          <aside className="flex justify-center items-center">
+            <div className="w-full max-w-[680px] px-[clamp(8px,1.5vw,24px)] space-y-[clamp(16px,3vw,32px)]">
+              {frameTypes.map((t) => (
+                <div key={t.id} className="flex flex-col gap-[clamp(8px,1.5vw,16px)]">
+                  <h2 className='font-["Hi_Melody"] text-[clamp(18px,2.5vw,28px)]'>
+                    {t.label}
+                  </h2>
+                  <div className="flex gap-[clamp(12px,2vw,24px)]">
+                    {t.options.map((opt) => {
+                      const isSelected = selectedFrame === opt;
+                      return (
+                        <button
+                          key={opt}
+                          type="button"
+                          onClick={() => updateSelectedFrame(opt)} 
+                          className={[
+                            "rounded-full border-4 transition-all size-[clamp(64px,8vw,120px)] ",
+                            isSelected
+                              ? "bg-[#b9b9b9] border-blue-500 shadow-[0_0_0_6px_rgba(79,140,255,0.25)]"
+                              : "border-2 border-gray-300 hover:border-gray-400",
+                          ].join(" ")}
+                          style={{ backgroundImage: `url(${opt})` }} 
+                        />
+                      );
+                    })}
+                  </div>
                 </div>
-              </div>
-            ))}
+              ))}
+            </div>
           </aside>
         </main>
 
@@ -106,12 +113,12 @@ export default function Frameselect() {
                        h-[clamp(44px,6vh,56px)]
                        rounded-xl border border-black bg-[#cfab8d]
                        text-[clamp(18px,2.2vw,24px)] text-black
-                       hover:brightness-95 disabled:opacity-50 transition'
-          >
+                       hover:brightness-95 disabled:opacity-50 transition'>
             Next
           </button>
         </footer>
       </section>
+      <CountdownOverlay remainingSec={sec} totalSec={10} label="자동으로 선택되고 넘어갑니다." />
     </div>
   );
 }
