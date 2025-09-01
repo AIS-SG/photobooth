@@ -1,5 +1,6 @@
 // src/hooks/useCamera.ts
 import { useCallback, useEffect, useRef, useState } from "react";
+import { usePhotoStore } from "../stores/photoStore";
 
 function makeFilename(cut: number) {
   const now = new Date();
@@ -16,6 +17,14 @@ function isStreamLive(s?: MediaStream | null) {
   return !!s && s.getVideoTracks().some((t) => t.readyState === "live");
 }
 
+type CaptureOptions = {
+  cutNumber: number;
+  /** 출력 가로 해상도 (기본 800 → 800x1200 저장) */
+  outW?: number;
+  /** 전역 스토어에 저장 여부 (기본 true) */
+  saveToStore?: boolean;
+};
+
 export function useCamera() {
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const [streamReady, setStreamReady] = useState(false);
@@ -23,6 +32,8 @@ export function useCamera() {
 
   const streamRef = useRef<MediaStream | null>(null);
   const startingRef = useRef(false);
+
+  const addPhoto = usePhotoStore((s) => s.add);
 
   /** 카메라 프리뷰 시작 (중복 호출 방지 포함) */
   const startPreview = useCallback(async () => {
@@ -54,7 +65,11 @@ export function useCamera() {
       const v = videoRef.current;
       if (v) {
         v.srcObject = stream;
-        try { await v.play(); } catch { /* iOS 자동재생 거부 가능 */ }
+        try {
+          await v.play();
+        } catch {
+          /* iOS 자동재생 거부 가능 */
+        }
       }
       setStreamReady(true);
     } catch (e: any) {
@@ -76,11 +91,12 @@ export function useCamera() {
   useEffect(() => () => stopPreview(), [stopPreview]);
 
   /**
-   * 현재 프레임을 2:3 중앙 크롭해서 저장/반환
-   * @param cutNumber 파일명 컷번호
-   * @param outW 출력 가로 해상도 (기본 800 → 800x1200 저장)
+   * 현재 프레임을 2:3 중앙 크롭해서 Blob/URL 반환.
+   * 기본적으로 전역 스토어에 저장(saveToStore=true).
    */
-  async function captureFrame(cutNumber: number, outW = 800) {
+  async function captureFrame(opts: CaptureOptions) {
+    const { cutNumber, outW = 800, saveToStore = true } = opts;
+
     const v = videoRef.current;
     if (!v) throw new Error("videoRef가 아직 연결되지 않았습니다.");
     if (!streamRef.current) throw new Error("카메라 스트림이 없습니다.");
@@ -90,44 +106,45 @@ export function useCamera() {
     // 원본 해상도
     const srcW = v.videoWidth || 1920;
     const srcH = v.videoHeight || 1080;
-    const srcAR = srcW / srcH; // 보통 4/3 또는 16/9
+    const srcAR = srcW / srcH;
     const targetAR = 2 / 3;
 
     // 중앙 크롭 영역 계산
-    let sx = 0, sy = 0, sw = srcW, sh = srcH;
+    let sx = 0,
+      sy = 0,
+      sw = srcW,
+      sh = srcH;
     if (srcAR > targetAR) {
-      // 가로가 더 넓음 → 좌우 크롭
-      const wantW = Math.round(srcH * targetAR); // 2/3 * H
+      // 좌우 크롭
+      const wantW = Math.round(srcH * targetAR);
       sx = Math.floor((srcW - wantW) / 2);
       sw = wantW;
     } else if (srcAR < targetAR) {
-      // 세로가 더 큼 → 상하 크롭 (드묾)
+      // 상하 크롭
       const wantH = Math.round(srcW / targetAR);
       sy = Math.floor((srcH - wantH) / 2);
       sh = wantH;
     }
 
     // 출력 캔버스는 정확히 2:3
-    const outH = Math.round(outW * 3 / 2);
+    const outH = Math.round((outW * 3) / 2);
     const canvas = document.createElement("canvas");
     canvas.width = outW;
     canvas.height = outH;
+
     const ctx = canvas.getContext("2d")!;
     ctx.imageSmoothingQuality = "high";
     ctx.drawImage(v, sx, sy, sw, sh, 0, 0, outW, outH);
 
-    const blob = await new Promise<Blob>((r) =>
-      canvas.toBlob((b) => r(b!), "image/jpeg", 0.95)
+    const blob = await new Promise<Blob>((resolve) =>
+      canvas.toBlob((b) => resolve(b!), "image/jpeg", 0.95)
     );
 
-    // 브라우저 다운로드 (경로 지정 불가, 파일명은 지정)
     const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = filename;
-    document.body.appendChild(a);
-    a.click();
-    a.remove();
+
+    if (saveToStore) {
+      addPhoto({ filename, url, blob, width: outW, height: outH });
+    }
 
     return { blob, filename, objectUrl: url, width: outW, height: outH };
   }
