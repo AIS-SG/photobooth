@@ -17,13 +17,29 @@ function isStreamLive(s?: MediaStream | null) {
   return !!s && s.getVideoTracks().some((t) => t.readyState === "live");
 }
 
-type CaptureOptions = {
+export type CaptureOptions = {
   cutNumber: number;
   /** 출력 가로 해상도 (기본 800 → 800x1200 저장) */
   outW?: number;
   /** 전역 스토어에 저장 여부 (기본 true) */
   saveToStore?: boolean;
 };
+
+/** 브라우저가 지원하는 가장 적절한 녹화 MIME 타입 선택 */
+function pickSupportedMimeType() {
+  const candidates = [
+    "video/webm;codecs=vp9,opus",
+    "video/webm;codecs=vp8,opus",
+    "video/webm",
+    "video/mp4;codecs=h264,aac",
+    "video/mp4",
+  ];
+  const MR: any = typeof window !== "undefined" ? (window as any).MediaRecorder : undefined;
+  for (const t of candidates) {
+    if (MR?.isTypeSupported?.(t)) return t;
+  }
+  return ""; // 브라우저가 결정하도록
+}
 
 export function useCamera() {
   const videoRef = useRef<HTMLVideoElement | null>(null);
@@ -33,54 +49,75 @@ export function useCamera() {
   const streamRef = useRef<MediaStream | null>(null);
   const startingRef = useRef(false);
 
+  // 녹화 관련
+  const mediaRecorderRef = useRef<MediaRecorder | null>(null);
+  const recordedChunksRef = useRef<Blob[]>([]);
+  const mimeTypeRef = useRef<string>(pickSupportedMimeType());
+
   const addPhoto = usePhotoStore((s) => s.add);
 
   /** 카메라 프리뷰 시작 (중복 호출 방지 포함) */
-  const startPreview = useCallback(async () => {
-    if (startingRef.current) return;
-    if (isStreamLive(streamRef.current)) {
-      if (!streamReady) setStreamReady(true);
-      return;
-    }
-    startingRef.current = true;
-    try {
-      setErrorMsg(null);
-
-      const devices = await navigator.mediaDevices.enumerateDevices();
-      const cams = devices.filter((d) => d.kind === "videoinput");
-      const preferred = cams.find((d) =>
-        /cam link|elgato|capture|hdmi|eos webcam|sony|nikon|canon/i.test(d.label)
-      );
-
-      const constraints: MediaStreamConstraints = {
-        video: preferred
-          ? { deviceId: { exact: preferred.deviceId } }
-          : { width: { ideal: 1920 }, height: { ideal: 1080 }, frameRate: { ideal: 30 } },
-        audio: false,
-      };
-
-      const stream = await navigator.mediaDevices.getUserMedia(constraints);
-      streamRef.current = stream;
-
-      const v = videoRef.current;
-      if (v) {
-        v.srcObject = stream;
-        try {
-          await v.play();
-        } catch {
-          /* iOS 자동재생 거부 가능 */
-        }
+  const startPreview = useCallback(
+    async (opts?: { audio?: boolean }) => {
+      const wantAudio = opts?.audio ?? true; // 기본 true: 동영상 녹화 시 오디오 포함 권장
+      if (startingRef.current) return;
+      if (isStreamLive(streamRef.current)) {
+        if (!streamReady) setStreamReady(true);
+        return;
       }
-      setStreamReady(true);
-    } catch (e: any) {
-      setErrorMsg(e?.message ?? String(e));
-      setStreamReady(false);
-    } finally {
-      startingRef.current = false;
-    }
-  }, [streamReady]);
+      startingRef.current = true;
+      try {
+        setErrorMsg(null);
+
+        const devices = await navigator.mediaDevices.enumerateDevices();
+        const cams = devices.filter((d) => d.kind === "videoinput");
+        const preferred = cams.find((d) =>
+          /cam link|elgato|capture|hdmi|eos webcam|sony|nikon|canon/i.test(d.label)
+        );
+
+        const constraints: MediaStreamConstraints = {
+          video: preferred
+            ? { deviceId: { exact: preferred.deviceId } }
+            : { width: { ideal: 1920 }, height: { ideal: 1080 }, frameRate: { ideal: 30 } },
+          audio: wantAudio, // 🔴 오디오 옵션화
+        };
+
+        const stream = await navigator.mediaDevices.getUserMedia(constraints);
+        streamRef.current = stream;
+
+        const v = videoRef.current;
+        if (v) {
+          v.srcObject = stream;
+          try {
+            await v.play();
+          } catch (err) {
+            // iOS 자동재생 거부 가능
+            void err;
+          }
+        }
+        setStreamReady(true);
+      } catch (e: any) {
+        setErrorMsg(e?.message ?? String(e));
+        setStreamReady(false);
+      } finally {
+        startingRef.current = false;
+      }
+    },
+    [streamReady]
+  );
 
   const stopPreview = useCallback(() => {
+    // 녹화 중이면 안전하게 끊기
+    try {
+      if (mediaRecorderRef.current && mediaRecorderRef.current.state !== "inactive") {
+        mediaRecorderRef.current.stop();
+      }
+    } catch (err) {
+      void err;
+    } finally {
+      mediaRecorderRef.current = null;
+    }
+
     if (streamRef.current) {
       streamRef.current.getTracks().forEach((t) => t.stop());
       streamRef.current = null;
@@ -149,5 +186,72 @@ export function useCamera() {
     return { blob, filename, objectUrl: url, width: outW, height: outH };
   }
 
-  return { videoRef, streamReady, errorMsg, startPreview, stopPreview, captureFrame };
+  // -----------------------
+  // 🔴 녹화 제어 API (MediaRecorder)
+  // -----------------------
+  const startRecording = useCallback(() => {
+    if (!streamRef.current) throw new Error("스트림이 없습니다. 먼저 startPreview()를 호출하세요.");
+    if (mediaRecorderRef.current && mediaRecorderRef.current.state !== "inactive") return;
+
+    recordedChunksRef.current = [];
+    const mr = new MediaRecorder(
+      streamRef.current,
+      mimeTypeRef.current ? { mimeType: mimeTypeRef.current } : undefined
+    );
+
+    mr.ondataavailable = (e) => {
+      if (e.data && e.data.size > 0) recordedChunksRef.current.push(e.data);
+    };
+    mr.start(); // timeslice 없이 한 파일로 쌓기
+    mediaRecorderRef.current = mr;
+  }, []);
+
+  const pauseRecording = useCallback(() => {
+    const mr = mediaRecorderRef.current;
+    if (mr && mr.state === "recording") mr.pause();
+  }, []);
+
+  const resumeRecording = useCallback(() => {
+    const mr = mediaRecorderRef.current;
+    if (mr && mr.state === "paused") mr.resume();
+  }, []);
+
+  const stopRecording = useCallback(async (): Promise<Blob | null> => {
+    const mr = mediaRecorderRef.current;
+    if (!mr) return null;
+
+    // inactive면 이미 완료된 상태: 누적 청크로 Blob 만들기
+    if (mr.state === "inactive") {
+      mediaRecorderRef.current = null;
+      return new Blob(recordedChunksRef.current, {
+        type: mimeTypeRef.current || "video/webm",
+      });
+    }
+
+    const done = new Promise<Blob>((resolve) => {
+      mr.onstop = () => {
+        const blob = new Blob(recordedChunksRef.current, {
+          type: mimeTypeRef.current || "video/webm",
+        });
+        resolve(blob);
+      };
+    });
+    mr.stop();
+    mediaRecorderRef.current = null;
+    return await done;
+  }, []);
+
+  return {
+    videoRef,
+    streamReady,
+    errorMsg,
+    startPreview,
+    stopPreview,
+    captureFrame,
+    // 🔴 추가: 녹화 제어
+    startRecording,
+    pauseRecording,
+    resumeRecording,
+    stopRecording,
+  };
 }
