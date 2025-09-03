@@ -67,8 +67,8 @@ export async function composeQuadImage(
 ): Promise<Blob> {
   const {
     design = { w: 1000, h: 1500 },
-    base = { x: 50, y: 220, w: 410, h: 600 },
-    gap = { x: 70, y: 45 },
+    base = { x: 46, y: 142, w: 436, h: 647 },
+    gap = { x: 55, y: 39 },
     count = 4,
     drawEmptyGuide = true,
     backgroundColor = "#ffffff",

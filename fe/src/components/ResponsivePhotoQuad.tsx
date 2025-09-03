@@ -1,6 +1,7 @@
 // ResponsivePhotoQuad.tsx
 import React, { useMemo } from "react";
 import { getSelectedFrame } from "../lib/selectFrame";
+import {frames} from "../pages/Frameselect"
 
 type Rect = { x: number; y: number; w: number; h: number };
 
@@ -34,8 +35,8 @@ type Props = {
 
 export function ResponsivePhotoQuad({
   design = { w: 1000, h: 1500 },
-  base = { x: 50, y: 220, w: 410, h: 600 },
-  gap = { x: 70, y: 45 },
+  base = { x: 46, y: 142, w: 436, h: 647 },
+  gap = { x: 55, y: 39 },
   count = 4,
 
   slots,
@@ -53,7 +54,10 @@ export function ResponsivePhotoQuad({
 }: Props) {
   const FRAME_W = design.w;
   const FRAME_H = design.h;
-  const frameImg = getSelectedFrame() ?? "";
+  
+  const selectedFrameId = getSelectedFrame();
+  const selectedFrame = frames.find(f=>f.id === selectedFrameId);
+  const frameImg = selectedFrame?.main?? "";
 
   // 슬롯 배치 (2x2)
   const rects: Rect[] = useMemo(() => {

@@ -7,6 +7,7 @@ import { getSelectedFrame } from "../lib/selectFrame";
 import { ResponsivePhotoQuad } from "../components/ResponsivePhotoQuad";
 import { saveComposedQuadAsFile } from "../lib/composePhotoQuad";
 import { usePhotoStore } from "../stores/photoStore";
+import {frames} from "./Frameselect"
 
 export default function Photoselect() {
   const navigate = useNavigate();
@@ -78,8 +79,9 @@ export default function Photoselect() {
     else insertId(id);
   };
 
-  const selectFrame = getSelectedFrame();
-  const frameImg = selectFrame ? selectFrame : "";
+  const selectedFrameId = getSelectedFrame();
+  const selectedFrame = frames.find(f=>f.id === selectedFrameId);
+  const frameImg = selectedFrame?.main?? "";
 
   const firstTileRef = useRef<HTMLDivElement | null>(null);
   const [tileW, setTileW] = useState(0); // 왼쪽 한 칸의 실제 너비(px)
@@ -198,7 +200,6 @@ export default function Photoselect() {
               type="button"
               onClick={async () => {
                 try {
-                  const frameImg = getSelectedFrame() ?? "";
                   await saveComposedQuadAsFile(
                     { slots, photos: sortedPhotos, frameImg },
                     { format: "png", filename: "photocard.png" }
