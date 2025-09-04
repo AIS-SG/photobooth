@@ -5,17 +5,26 @@ import { CountdownOverlay } from "../components/CountdownOverlay";
 import {getSelectedFrame, setSelectedFrame} from "../lib/selectFrame";
 import basic1 from "../img/frame/basic-1.png";
 import basic2 from "../img/frame/basic-2.png";
+import basic3 from "../img/frame/basic-3.png";
 import event1 from "../img/frame/event-1.png";
 import event2 from "../img/frame/event-2.png";
+import event3 from "../img/frame/event-3.png";
+import pre_basic1 from "../img/preview_frame/basic-1.png";
+import pre_basic2 from "../img/preview_frame/basic-2.png";
+import pre_basic3 from "../img/preview_frame/basic-3.png";
 import pre_event1 from "../img/preview_frame/event-1.png"
+import pre_event2 from "../img/preview_frame/event-2.png";
+import pre_event3 from "../img/preview_frame/event-3.png";
 
 
 // 메인과 프리뷰 이미지를 함께 관리하는 객체
 export const frames = [
-  { id: "basic-1", main: basic1, preview: basic1, label: "기본-1", type: "basic" },
-  { id: "basic-2", main: basic2, preview:basic2, label: "기본-2", type: "basic" },
+  { id: "basic-1", main: basic1, preview: pre_basic1, label: "기본-1", type: "basic" },
+  { id: "basic-2", main: basic2, preview:pre_basic2, label: "기본-2", type: "basic" },
+  { id: "basic-3", main: basic3, preview:pre_basic3, label: "기본-3", type: "basic" },
   { id: "event-1", main: event1, preview: pre_event1, label: "이벤트-1", type: "event" },
-  { id: "event-2", main: event2, preview: event2, label: "이벤트-2", type: "event" },
+  { id: "event-2", main: event2, preview: pre_event2, label: "이벤트-2", type: "event" },
+  { id: "event-3", main: event3, preview: pre_event3, label: "이벤트-3", type: "event" },
 ];
 
 export default function Frameselect() {
