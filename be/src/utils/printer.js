@@ -41,7 +41,8 @@ export const printImageFile = async(file, copy) => {
      console.log(`Printing ${tempPngPath}...`);
      
      // 터미널에서 작동한 명령어를 그대로 사용
-     await execPromise(`lp -d Canon_SELPHY_CP1500 -o media=4x6in -n ${copy} "${tempPngPath}"`);
+     console.log(`copy ${copy}...`);
+     await execPromise(`lp -d Canon_SELPHY_CP1500 -o media=4x6in -n${copy} "${tempPngPath}"`);
 
      console.log('Print job sent successfully!');
    } catch (error) {
