@@ -40,7 +40,7 @@ export default function Photoselect() {
 
   // 타이머
   const { sec,pause } = useCountdown({
-    seconds: 100,
+    seconds: 10,
     autostart: true,
     onExpire: async()=>{
       const currentSelectedPhotos = slots.filter((id):id is number => id !== null);

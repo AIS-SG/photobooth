@@ -8,7 +8,7 @@ import {CountdownOverlay} from "../components/CountdownOverlay"
 export default function Qrcode() {
   const navigate = useNavigate();
   const { sec } = useCountdown({
-      seconds: 100,
+      seconds: 30,
       autostart: true,
       onExpire: () => navigate("/Finish", { replace: true }),
     });
@@ -114,7 +114,6 @@ export default function Qrcode() {
               <h2 className="font-['Hi-Melody'] text-black text-2xl md:text-4xl">QR 코드</h2>
               <div className="flex-1 flex items-center justify-center">
                 <div className="bg-[#d9d9d9]/50 p-6 flex items-center justify-center w-full max-w-[400px] aspect-square"
-                onClick={() => navigate('/Finish')}
                 style={{ backgroundImage: `url(${qrCodeDataUrl})`, backgroundSize: "cover", backgroundPosition: "center" }}
                 >   
               </div>
@@ -122,7 +121,7 @@ export default function Qrcode() {
           </div>
           <CountdownOverlay
                   remainingSec={sec}
-                  totalSec={100}
+                  totalSec={30}
                   label="다음 화면으로 넘어갑니다."
                 />
         </div>

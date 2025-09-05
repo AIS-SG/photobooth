@@ -41,7 +41,7 @@ export default function Frameselect() {
   }, [selectedFrameId]);
 
   const { sec } = useCountdown({
-    seconds: 40,
+    seconds: 100,
     autostart: true,
     onExpire: () => {
       navigate("/Loading", { replace: true });
@@ -133,7 +133,7 @@ export default function Frameselect() {
           </button>
         </footer>
       </section>
-      <CountdownOverlay remainingSec={sec} totalSec={40} label="자동으로 선택되고 넘어갑니다." />
+      <CountdownOverlay remainingSec={sec} totalSec={10} label="자동으로 선택되고 넘어갑니다." />
     </div>
   );
 }
