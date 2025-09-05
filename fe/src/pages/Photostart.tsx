@@ -1,7 +1,14 @@
 import { useNavigate } from "react-router-dom";
+import { useCountdown } from "../hooks/useCountdown";
+import { CountdownOverlay } from "../components/CountdownOverlay";
 
 export default function Photostart() {
   const navigate = useNavigate();
+  const { sec } = useCountdown({
+        seconds: 60,
+        autostart: true,
+        onExpire: () => navigate("/Phototime", { replace: true }),
+    });
 
   return (
     <main className="w-screen h-screen bg-[#CFAB8D] flex flex-col">
@@ -27,9 +34,8 @@ export default function Photostart() {
         >
           START
         </button>
+        <CountdownOverlay remainingSec={sec} totalSec={60} label="자동으로 촬영 화면으로 넘어갑니다." />
       </section>
-
-      
     </main>
   );
 }
