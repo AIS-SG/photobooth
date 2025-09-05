@@ -40,9 +40,30 @@ export default function Photoselect() {
 
   // 타이머
   const { sec } = useCountdown({
-    seconds: 100,
+    seconds: 10,
     autostart: true,
-    onExpire: () => navigate("/Qrcode", { replace: true }),
+    onExpire: async()=>{
+      const currentSelectedPhotos = slots.filter((id):id is number => id !== null);
+      let finalSlots = [...currentSelectedPhotos];
+      if(finalSlots.length < MAX){
+        const unselectedPhotos = mainIds.filter(id=>!selectedSet.has(id));
+        const remainingSlots = MAX - finalSlots.length;
+        const autoSelected = unselectedPhotos.slice(0, remainingSlots);
+        finalSlots = [...finalSlots, ...autoSelected];
+      }
+      
+      try{
+        const response = await saveComposedQuadAsFile(
+          {slots: finalSlots, photos: sortedPhotos, frameImg},
+          {format:"png", filename: "photocard.png"}
+        );
+        console.log(response);
+        navigate("/Qrcode", {state:{qrCodeDataUrl: response.success.qrCodeDataUrl}, replace: true});
+      } catch(e){
+        console.error(e);
+      }
+    },
+    //onExpire: () => navigate("/Qrcode", { replace: true }),
   });
 
   const MAX = 4;
