@@ -14,6 +14,7 @@ export default function Loading() {
                 aria-live="polite" >
                 잠시만 기다려주시길 바랍니다.
             </p>
+            
         </main>
     );
 }
