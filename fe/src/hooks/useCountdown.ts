@@ -18,7 +18,7 @@ export function useCountdown({ seconds, autostart = true, onExpire, onTick }: Op
   const onTickRef = useRef(onTick);
   useEffect(() => { onExpireRef.current = onExpire; }, [onExpire]);
   useEffect(() => { onTickRef.current = onTick; }, [onTick]);
-
+  const remainingTimeRef = useRef(0);
   const clear = () => {
     if (timerRef.current != null) {
       window.clearInterval(timerRef.current);
@@ -50,6 +50,20 @@ export function useCountdown({ seconds, autostart = true, onExpire, onTick }: Op
     }, 250);
   }, [seconds]); // ✅ seconds만 의존
 
+  const pause = useCallback(() => {
+    if (timerRef.current != null) {
+      clear();
+      remainingTimeRef.current = sec; // 남은 시간 저장
+    }
+  }, [sec]);
+
+  const resume = useCallback(() => {
+    if (remainingTimeRef.current > 0) {
+      start(remainingTimeRef.current); // 저장된 시간으로 다시 시작
+      remainingTimeRef.current = 0; // 초기화
+    }
+  }, [start]);
+
   const reset = useCallback((s?: number) => {
     clear();
     setSec(s ?? seconds);
@@ -66,5 +80,5 @@ export function useCountdown({ seconds, autostart = true, onExpire, onTick }: Op
   // 디버깅: 렌더된 sec 값
   // useEffect(() => { console.log("[useCountdown] sec ->", sec); }, [sec]);
 
-  return { sec, start, reset };
+  return { sec, start, reset, pause, resume };
 }

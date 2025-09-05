@@ -45,7 +45,7 @@ export default function Qrcode() {
       // iOS/Safari에서 타임랩스 느낌을 위해 피치 보정 끄기
       // @ts-expect-error - vendor prefixed
       if (typeof v.webkitPreservesPitch === "boolean") v.webkitPreservesPitch = false;
-      // @ts-expect-error - 일부 브라우저에 존재
+      // // @ts-expect-error - 일부 브라우저에 존재
       if (typeof (v as any).preservesPitch === "boolean") (v as any).preservesPitch = false;
 
       v.muted = true;                 // 자동재생 정책 충족
