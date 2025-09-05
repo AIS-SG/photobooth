@@ -1,3 +1,5 @@
+import { uploadPhoto } from "./api";
+
 type Rect = { x: number; y: number; w: number; h: number };
 
 type ComposeOptions = {
@@ -149,12 +151,17 @@ export async function saveComposedQuadAsFile(
 ) {
   const filename = options?.filename ?? (options?.format === "jpeg" ? "photocard.jpg" : "photocard.png");
   const blob = await composeQuadImage(args, options);
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement("a");
-  a.href = url;
-  a.download = filename;
-  document.body.appendChild(a);
-  a.click();
-  a.remove();
-  URL.revokeObjectURL(url);
+  // const url = URL.createObjectURL(blob);
+  // const a = document.createElement("a");
+  // a.href = url;
+  // a.download = filename;
+  // document.body.appendChild(a);
+  // a.click();
+  // a.remove();
+  // URL.revokeObjectURL(url);
+
+  const file = new File([blob], filename, {type:blob.type});
+  const response = await uploadPhoto(file);
+
+  return response;
 }

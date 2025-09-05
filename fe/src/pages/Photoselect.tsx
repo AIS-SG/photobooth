@@ -200,11 +200,12 @@ export default function Photoselect() {
               type="button"
               onClick={async () => {
                 try {
-                  await saveComposedQuadAsFile(
+                  const response = await saveComposedQuadAsFile(
                     { slots, photos: sortedPhotos, frameImg },
                     { format: "png", filename: "photocard.png" }
                   );
-                  navigate("/Qrcode", { state: { selectedOrder: slots }, replace: true });
+                  console.log(response);
+                  navigate("/Qrcode", { state: { qrCodeDataUrl: response.success.qrCodeDataUrl }, replace: true });
                 } catch (e) {
                   console.error(e);
                 }

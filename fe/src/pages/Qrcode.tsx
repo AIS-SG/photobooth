@@ -1,17 +1,27 @@
 // src/pages/Qrcode.tsx
 import { useEffect, useRef, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { usePhotoStore } from "../stores/photoStore";
+import { useCountdown } from "../hooks/useCountdown";
+import {CountdownOverlay} from "../components/CountdownOverlay"
 
 export default function Qrcode() {
   const navigate = useNavigate();
+  const { sec } = useCountdown({
+      seconds: 30,
+      autostart: true,
+      onExpire: () => navigate("/Finish", { replace: true }),
+    });
+
   const recordedVideo = usePhotoStore((s) => s.recordedVideo);
   const buildRecordedVideoURL = usePhotoStore((s) => s.buildRecordedVideoURL);
   const clearRecordedVideoURL = usePhotoStore((s) => s.clearRecordedVideoURL);
 
   const [videoURL, setVideoURL] = useState<string | null>(null);
   const videoRef = useRef<HTMLVideoElement | null>(null);
-
+  const location = useLocation();
+  const {qrCodeDataUrl} = location.state || {};
+  
   // 타임랩스 재생 속도 (원하면 4~12 사이로 바꿔도 됨)
   const SPEED = 6;
 
@@ -99,23 +109,21 @@ export default function Qrcode() {
             </div>
           </div>
 
-          {/* ➡️ 우측: QR 코드 */}
-          <div className="flex flex-col flex-1 gap-4">
-            <h2 className="font-['Hi-Melody'] text-black text-2xl md:text-4xl">QR 코드</h2>
-            <div className="flex-1 flex items-center justify-center">
-              <div className="bg-[#d9d9d9]/50 p-6 flex items-center justify-center w-full max-w-[400px] aspect-square">
-                <div
-                  className="bg-[#d9d9d9] border border-black rounded-sm p-4 w-full h-full cursor-pointer"
-                  onClick={() => navigate("/Finish")}
-                  role="img"
-                  aria-label="QR 코드 플레이스홀더"
-                >
-                  <div className="w-full h-full bg-[#e1e1e1] rounded-[4px]" />
-                </div>
+            {/* ➡️ 우측: QR 코드 */}
+            <div className="flex flex-col flex-1 gap-4">
+              <h2 className="font-['Hi-Melody'] text-black text-2xl md:text-4xl">QR 코드</h2>
+              <div className="flex-1 flex items-center justify-center">
+                <div className="bg-[#d9d9d9]/50 p-6 flex items-center justify-center w-full max-w-[400px] aspect-square"
+                style={{ backgroundImage: `url(${qrCodeDataUrl})`, backgroundSize: "cover", backgroundPosition: "center" }}
+                >   
               </div>
             </div>
           </div>
-
+          <CountdownOverlay
+                  remainingSec={sec}
+                  totalSec={30}
+                  label="다음 화면으로 넘어갑니다."
+                />
         </div>
       </section>
     </main>
