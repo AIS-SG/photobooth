@@ -34,8 +34,7 @@ export const processPhoto = async (
       url: newUrl,
       blob: newBlob,
       width: photoItem.width,
-      height: photoItem.height,
-      createdAt: photoItem.createdAt
+      height: photoItem.height
     };
   } catch (error) {
     // ✅ 백틱(``)을 사용해 문자열 보간법 수정
