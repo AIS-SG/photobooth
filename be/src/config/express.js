@@ -5,7 +5,7 @@ import { commonResponse } from "../utils/response.js";
 export const setupExpress = () => {
   const app = express();
   app.use(cors({
-    origin: "http://localhost:5173",
+    origin: "https://photobooth-guri.netlify.app",
     credentials:true,
   })); // cors 방식 허용
   app.use(express.static("public")); // 정적 파일 접근
