@@ -1,5 +1,5 @@
 import { uploadPhoto } from "./api";
-
+import { getQuantity } from "./quantity";
 type Rect = { x: number; y: number; w: number; h: number };
 
 type ComposeOptions = {
@@ -161,7 +161,8 @@ export async function saveComposedQuadAsFile(
   // URL.revokeObjectURL(url);
 
   const file = new File([blob], filename, {type:blob.type});
-  const response = await uploadPhoto(file);
+  const quantity = getQuantity();
+  const response = await uploadPhoto(file, quantity);
 
   return response;
 }

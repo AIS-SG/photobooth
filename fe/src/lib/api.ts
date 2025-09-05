@@ -6,9 +6,10 @@ export const api = axios.create({
 });
 
 
-export const uploadPhoto = async(file: File) => {
+export const uploadPhoto = async(file: File, printCount: number) => {
   const formData = new FormData();
   formData.append("photo", file);
+  formData.append("printCount", String(printCount));
 
   try{
     const response = await api.post("/photo/submit", formData, {headers: {"Content-Type" : "multipart/form-data",},});
