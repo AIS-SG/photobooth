@@ -162,6 +162,7 @@ export async function saveComposedQuadAsFile(
 
   const file = new File([blob], filename, {type:blob.type});
   const quantity = getQuantity();
+  console.log(quantity);
   const response = await uploadPhoto(file, quantity);
 
   return response;
