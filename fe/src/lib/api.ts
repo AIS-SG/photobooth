@@ -1,7 +1,7 @@
 import axios from "axios";
 
 export const api = axios.create({
-  baseURL: import.meta.env.VITE_API_URL || "https://5f7ad188c727.ngrok-free.app",
+  baseURL: import.meta.env.VITE_API_URL || " https://27435039af45.ngrok-free.app",
   withCredentials: true,
 });
 
