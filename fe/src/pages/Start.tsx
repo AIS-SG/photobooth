@@ -1,10 +1,16 @@
 import { useNavigate } from "react-router-dom";
 import { usePhotoStore } from "../stores/photoStore";
+import { useEffect } from "react";
 
 export default function Start() {
   const navigate = useNavigate();
   const clearStore = usePhotoStore((s) => s.clear);
   const setRecordedVideo = usePhotoStore((s) => s.setRecordedVideo);
+
+  useEffect(()=>{
+    clearStore();
+    setRecordedVideo(null);
+  },[clearStore, setRecordedVideo]);
 
   return (
     <main className="w-screen h-screen bg-white flex" onClick={() => navigate("/count")}>
