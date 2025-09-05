@@ -39,7 +39,7 @@ export default function Photoselect() {
   );
 
   // 타이머
-  const { sec } = useCountdown({
+  const { sec,pause } = useCountdown({
     seconds: 10,
     autostart: true,
     onExpire: async()=>{
@@ -126,7 +126,7 @@ export default function Photoselect() {
   // 프레임(2:3) 컨테이너의 실제 너비/높이
   const frameW = tileW > 0 ? tileW * 2 + GAP + PAD * 2 : 0;
   //const frameH = frameW > 0 ? Math.round(frameW * 1.5) : 0; // (참고용, 현재 미사용)
-
+  let notClick = true;
   return (
     <div className="relative w-screen h-screen bg-[#CFAB8D]">
       {/* 흰색 인셋 박스 */}
@@ -215,11 +215,13 @@ export default function Photoselect() {
         </div>
 
         {/* 하단: Next (정확히 4장일 때만 활성화) */}
-        {isExactFour && (
+        {notClick && isExactFour && (
           <div className="absolute right-8 bottom-8 z-20">
             <button
               type="button"
               onClick={async () => {
+                pause();
+                notClick = false;
                 try {
                   const response = await saveComposedQuadAsFile(
                     { slots, photos: sortedPhotos, frameImg },
