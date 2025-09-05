@@ -35,7 +35,7 @@ type Props = {
 
 export function ResponsivePhotoQuad({
   design = { w: 1000, h: 1500 },
-  base = { x: 100, y: 240, w: 370, h: 555 },
+  base = { x: 100, y: 250, w: 370, h: 555 },
   gap = { x: 60, y: 61 },
   count = 4,
 
