@@ -125,7 +125,7 @@ export default function Frameselect() {
         
         <footer className="mt-auto flex justify-end">
           <button
-            onClick={() => selectedFrameId && navigate("/Loading")}
+            onClick={() => selectedFrameId && navigate("/Photoselect")}
             disabled={!selectedFrameId}
             className='font-["Hi_Melody"] whitespace-nowrap px-[clamp(16px,2.8vw,28px)] h-[clamp(44px,6vh,56px)] rounded-xl border border-black bg-[#cfab8d] text-[clamp(18px,2.2vw,24px)] text-black hover:brightness-95 disabled:opacity-50 transition'
           >
