@@ -17,6 +17,7 @@ type PhotoState = {
   setMany: (arr: Omit<CapturedPhoto, "id" | "createdAt">[]) => void;
   clear: () => void;
   remove: (id: string) => void;
+  updatePhoto: (updatedItem: CapturedPhoto) => void;
 
   // 🎥 녹화 영상 관련
   recordedVideo: Blob | null;
@@ -62,6 +63,20 @@ export const usePhotoStore = create<PhotoState>((set, get) => ({
     const it = get().items.find((x) => x.id === id);
     if (it) URL.revokeObjectURL(it.url);
     set((s) => ({ items: s.items.filter((x) => x.id !== id) }));
+  },
+  updatePhoto:(updatedItem) => {
+    set((state) => {
+      // ✅ 기존 URL을 해제하여 메모리 누수를 방지합니다.
+      const oldItem = state.items.find(item => item.id === updatedItem.id);
+      if (oldItem && oldItem.url) {
+        URL.revokeObjectURL(oldItem.url);
+      }
+      return {
+        items: state.items.map((item) =>
+          item.id === updatedItem.id ? updatedItem : item
+        ),
+      };
+    });
   },
 
   // ----------------
