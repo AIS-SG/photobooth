@@ -90,6 +90,7 @@ export default function Qrcode() {
                   <video
                     ref={videoRef}
                     src={videoURL}
+                    style={{ transform: 'scaleY(-1)' }}
                     // 자동재생/반복/모바일 인라인 재생
                     autoPlay
                     loop
