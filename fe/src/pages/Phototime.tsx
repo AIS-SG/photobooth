@@ -186,6 +186,7 @@ export default function Phototime() {
               <div className="relative aspect-[4/3] mx-auto h-full max-h-full overflow-hidden bg-black">
                 <video
                   ref={videoRef}
+                  style={{ transform: 'scaleX(-1)' }}
                   autoPlay
                   muted
                   playsInline
