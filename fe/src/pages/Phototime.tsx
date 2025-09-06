@@ -46,7 +46,19 @@ export default function Phototime() {
 
   // 자동 startPreview는 하지 않고, 최종 언마운트에서만 정리
   useEffect(() => {
-    clearStore();
+    const init = async () => {
+    clearStore(); // 기존 스토어 초기화
+    try {
+        await startPreview();           // 페이지 진입 시 바로 카메라 켬
+        startRecording?.();             // 녹화 시작
+        reset(8);                       // 타이머 초기화
+        start(8);                        // 카운트다운 시작
+      } catch (e) {
+        console.error("카메라 초기화 실패:", e);
+      }
+    };
+
+    init();
     return () => {
       if (intermissionTid.current) {
         clearTimeout(intermissionTid.current);
