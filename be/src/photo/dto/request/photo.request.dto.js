@@ -1,7 +1,7 @@
 export const submitRequestDto = (body, file) => {
   return {
     photo : file,
-    number : parseInt(body.number) || 1,
+    number : parseInt(body.printCount) || 1,
   }
 }
 
