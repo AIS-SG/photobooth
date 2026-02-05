@@ -4,5 +4,6 @@ fe/node_modules
 **/node_modules
 # Keep environment variables out of version control
 .env
-
+**/uploaded
 be/src/generated/prisma
+**/.DS_Store

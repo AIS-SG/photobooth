@@ -200,12 +200,15 @@ export default function Photoselect() {
               type="button"
               onClick={async () => {
                 try {
+                  // 녹화된 타임랩스가 있으면 함께 업로드해서 ZIP으로 묶음
+                  const recordedVideo = usePhotoStore.getState().recordedVideo;
                   const response = await saveComposedQuadAsFile(
                     { slots, photos: sortedPhotos, frameImg },
-                    { format: "png", filename: "photocard.png" }
+                    { format: "png", filename: "photocard.png" },
+                    recordedVideo ?? null
                   );
                   console.log(response);
-                  navigate("/Qrcode", { state: { qrCodeDataUrl: response.success.qrCodeDataUrl }, replace: true });
+                  navigate("/Qrcode", { state: { qrCodeDataUrl: response.success.qrCodeDataUrl, downloadUrl: response.success.downloadUrl }, replace: true });
                 } catch (e) {
                   console.error(e);
                 }

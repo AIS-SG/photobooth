@@ -113,10 +113,12 @@ export default function Qrcode() {
             <div className="flex flex-col flex-1 gap-4">
               <h2 className="font-['Hi-Melody'] text-black text-2xl md:text-4xl">QR 코드</h2>
               <div className="flex-1 flex items-center justify-center">
-                <div className="bg-[#d9d9d9]/50 p-6 flex items-center justify-center w-full max-w-[400px] aspect-square"
-                style={{ backgroundImage: `url(${qrCodeDataUrl})`, backgroundSize: "cover", backgroundPosition: "center" }}
-                >   
-              </div>
+                <div className="flex flex-col items-center gap-4">
+                  <div className="bg-[#d9d9d9]/50 p-6 flex items-center justify-center w-full max-w-[400px] aspect-square"
+                    style={{ backgroundImage: `url(${qrCodeDataUrl})`, backgroundSize: "cover", backgroundPosition: "center" }}
+                  />
+                  {location.state?.downloadUrl}
+                </div>
             </div>
           </div>
           <CountdownOverlay

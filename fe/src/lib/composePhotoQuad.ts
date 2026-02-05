@@ -147,21 +147,22 @@ export async function composeQuadImage(
 
 export async function saveComposedQuadAsFile(
   args: Parameters<typeof composeQuadImage>[0],
-  options?: ComposeOptions & { filename?: string }
+  options?: ComposeOptions & { filename?: string },
+  timelapseBlob?: Blob | null
 ) {
   const filename = options?.filename ?? (options?.format === "jpeg" ? "photocard.jpg" : "photocard.png");
   const blob = await composeQuadImage(args, options);
-  // const url = URL.createObjectURL(blob);
-  // const a = document.createElement("a");
-  // a.href = url;
-  // a.download = filename;
-  // document.body.appendChild(a);
-  // a.click();
-  // a.remove();
-  // URL.revokeObjectURL(url);
 
   const file = new File([blob], filename, {type:blob.type});
-  const response = await uploadPhoto(file);
+
+  // optional timelapse file
+  let timelapseFile: File | undefined;
+  if (timelapseBlob) {
+    const ext = timelapseBlob.type?.split("/").at(-1) ?? "mp4";
+    timelapseFile = new File([timelapseBlob], `timelapse.${ext}`, { type: timelapseBlob.type || 'video/mp4' });
+  }
+
+  const response = await uploadPhoto(file, timelapseFile);
 
   return response;
 }

@@ -1,10 +1,18 @@
 import { useNavigate } from "react-router-dom";
+import { useEffect } from "react";
 import { usePhotoStore } from "../stores/photoStore";
 
 export default function Start() {
   const navigate = useNavigate();
   const clearStore = usePhotoStore((s) => s.clear);
   const setRecordedVideo = usePhotoStore((s) => s.setRecordedVideo);
+
+  // 시작 화면에 진입할 때마다 로컬에 보관된 사진/영상(Blob, ObjectURL 포함)을 정리합니다.
+  useEffect(() => {
+    clearStore();
+    // 추가로 recordedVideo가 Blob으로 남아 있다면 명시적으로 null로 설정
+    setRecordedVideo(null);
+  }, [clearStore, setRecordedVideo]);
 
   return (
     <main className="w-screen h-screen bg-white flex" onClick={() => navigate("/count")}>

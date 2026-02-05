@@ -34,6 +34,8 @@ export default function Phototime() {
     pauseRecording,
     resumeRecording,
     stopRecording,
+    mirrored,
+    toggleMirror,
   } = useCamera();
 
   // 🔸 촬영 직후 인터미션: 비디오 프레임을 그대로 멈춰 보여주기
@@ -178,7 +180,21 @@ export default function Phototime() {
                   muted
                   playsInline
                   className="absolute inset-0 w-full h-full object-cover object-center"
+                  style={{ transform: mirrored ? "scaleX(-1)" : undefined }}
                 />
+
+                {/* 좌우 반전 토글 버튼 */}
+                <div className="absolute top-4 right-4 z-20">
+                  <button
+                    type="button"
+                    onClick={() => toggleMirror()}
+                    className="px-3 py-1 rounded bg-white/90 text-sm font-medium"
+                    aria-pressed={mirrored}
+                    aria-label="좌우 반전 토글"
+                  >
+                    {mirrored ? "반전 ON" : "반전 OFF"}
+                  </button>
+                </div>
                 {/* 2:3 가이드 프레임 */}
                 <div
                   className="

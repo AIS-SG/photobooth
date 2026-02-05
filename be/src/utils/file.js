@@ -7,7 +7,8 @@ export const savePhotoFile = async(filename, file) => {
       const directory = path.resolve(path.dirname(__filename), "../../uploaded");
       const dirPath = path.resolve(directory);
       const filePath = path.join(dirPath, filename);
-
+      
+      await fs.mkdir(dirPath, { recursive: true });
       await fs.writeFile(filePath, file.buffer);
 
       console.log(`✅ File saved successfully to: ${filePath}`);

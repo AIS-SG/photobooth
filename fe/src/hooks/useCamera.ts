@@ -46,6 +46,9 @@ export function useCamera() {
   const [streamReady, setStreamReady] = useState(false);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
 
+  // 좌우 반전 상태
+  const [mirrored, setMirrored] = useState(false);
+
   const streamRef = useRef<MediaStream | null>(null);
   const startingRef = useRef(false);
 
@@ -171,7 +174,17 @@ export function useCamera() {
 
     const ctx = canvas.getContext("2d")!;
     ctx.imageSmoothingQuality = "high";
-    ctx.drawImage(v, sx, sy, sw, sh, 0, 0, outW, outH);
+
+    // 좌우 반전 옵션이 활성화되면 캔버스에 반전 적용 후 그리기
+    if (mirrored) {
+      ctx.save();
+      ctx.translate(outW, 0);
+      ctx.scale(-1, 1);
+      ctx.drawImage(v, sx, sy, sw, sh, 0, 0, outW, outH);
+      ctx.restore();
+    } else {
+      ctx.drawImage(v, sx, sy, sw, sh, 0, 0, outW, outH);
+    }
 
     const blob = await new Promise<Blob>((resolve) =>
       canvas.toBlob((b) => resolve(b!), "image/jpeg", 0.95)
@@ -241,6 +254,8 @@ export function useCamera() {
     return await done;
   }, []);
 
+  const toggleMirror = () => setMirrored((v) => !v);
+
   return {
     videoRef,
     streamReady,
@@ -248,6 +263,9 @@ export function useCamera() {
     startPreview,
     stopPreview,
     captureFrame,
+    // mirror
+    mirrored,
+    toggleMirror,
     // 🔴 추가: 녹화 제어
     startRecording,
     pauseRecording,

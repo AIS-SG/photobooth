@@ -1,14 +1,15 @@
 import axios from "axios";
 
 export const api = axios.create({
-  baseURL: import.meta.env.VITE_API_URL || " https://27435039af45.ngrok-free.app",
+  baseURL: import.meta.env.VITE_API_URL || "http://localhost:3000/",
   withCredentials: true,
 });
 
 
-export const uploadPhoto = async(file: File) => {
+export const uploadPhoto = async(file: File, timelapse?: File) => {
   const formData = new FormData();
   formData.append("photo", file);
+  if (timelapse) formData.append("timelapse", timelapse);
 
   try{
     const response = await api.post("/photo/submit", formData, {headers: {"Content-Type" : "multipart/form-data",},});

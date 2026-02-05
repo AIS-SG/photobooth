@@ -1,8 +1,9 @@
-export const submitRequestDto = (body, file) => {
+export const submitRequestDto = (body, photoFile, timelapseFile) => {
   return {
-    photo : file,
-    number : parseInt(body.number) || 1,
-  }
+    photo: photoFile,
+    timelapse: timelapseFile || null,
+    number: parseInt(body.number) || 1,
+  };
 }
 
 export const downloadRequestDto = (query) => {
@@ -10,3 +11,4 @@ export const downloadRequestDto = (query) => {
     name : query.name,
   }
 }
+ 

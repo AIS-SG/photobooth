@@ -2,6 +2,7 @@ import { downloadRequestDto, submitRequestDto } from "../dto/request/photo.reque
 import { submit, verify } from "../service/photo.service.js";
 import {StatusCodes} from "http-status-codes"
 import fs from 'fs';
+import path from 'path';
 
 export const handleSubmit = async(req,res,next) => {
   /*
@@ -18,6 +19,10 @@ export const handleSubmit = async(req,res,next) => {
                 type:"string",
                 format:"binary",
               },
+              timelapse:{
+                type:"string",
+                format:"binary",
+              },
               number: {
                 type:"number",
                 example: 2,
@@ -28,8 +33,15 @@ export const handleSubmit = async(req,res,next) => {
       }
     }
   */
-  const qrCode = await submit(submitRequestDto(req.body, req.file));
-  res.status(StatusCodes.OK).success(qrCode);
+  try {
+    const files = req.files || {};
+    const photoFile = Array.isArray(files.photo) ? files.photo[0] : files.photo || req.file;
+    const timelapseFile = Array.isArray(files.timelapse) ? files.timelapse[0] : files.timelapse || null;
+    const qrCode = await submit(submitRequestDto(req.body, photoFile, timelapseFile));
+    res.status(StatusCodes.OK).success(qrCode);
+  } catch (err) {
+    next(err);
+  }
 }
 export const handleDownload = async (req,res,next) => {
   /*
@@ -40,8 +52,25 @@ export const handleDownload = async (req,res,next) => {
       required:true,
     }
   */
-  await verify(downloadRequestDto(req.query));
-  const imagePath = `./uploaded/${req.query.name}`;
-  res.setHeader('Content-Type', `image/${(req.query.name).split(".").at(-1)}`);
-  fs.createReadStream(imagePath).pipe(res);
+  try {
+    await verify(downloadRequestDto(req.query));
+    const fileName = path.basename(req.query.name);
+    const filePath = path.resolve(`./uploaded/${fileName}`);
+    const ext = path.extname(filePath).toLowerCase();
+
+    let contentType = 'application/octet-stream';
+    if (ext === '.zip') contentType = 'application/zip';
+    else if (ext === '.png' || ext === '.jpg' || ext === '.jpeg') contentType = `image/${ext.replace('.', '')}`;
+    else if (ext === '.mp4') contentType = 'video/mp4';
+    else if (ext === '.webm') contentType = 'video/webm';
+    else if (ext === '.mov') contentType = 'video/quicktime';
+    else if (ext === '.avi') contentType = 'video/x-msvideo';
+    else if (ext === '.mkv') contentType = 'video/x-matroska';
+
+    res.setHeader('Content-Type', contentType);
+    res.setHeader('Content-Disposition', `attachment; filename="${fileName}"`);
+    fs.createReadStream(filePath).pipe(res);
+  } catch (err) {
+    next(err);
+  }
 }
