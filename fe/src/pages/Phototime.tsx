@@ -63,7 +63,7 @@ export default function Phototime() {
 
   // 카운트다운
   const { sec, start, reset, pause, resume } = useCountdown({
-    seconds: 3,
+    seconds: 8,
     autostart: false,
     onExpire: async () => {
       // 1) 사진 캡쳐(2:3 리사이즈)
@@ -100,8 +100,8 @@ export default function Phototime() {
           setIsIntermission(false);
 
           setCurrentPhoto((p) => p + 1);
-          reset(3);
-          start(3);
+          reset(8);
+          start(8);
 
           intermissionTid.current = null;
         }, INTERMISSION_MS);
@@ -136,8 +136,8 @@ export default function Phototime() {
   useEffect(() => {
     if (streamReady && !countdownStartedRef.current) {
       countdownStartedRef.current = true;
-      reset(3);
-      start(3);
+      reset(8);
+      start(8);
 
       if (!recordingStartedRef.current) {
         try {
