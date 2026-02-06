@@ -63,7 +63,7 @@ export function useCamera() {
   /** 카메라 프리뷰 시작 (중복 호출 방지 포함) */
   const startPreview = useCallback(
     async (opts?: { audio?: boolean }) => {
-      const wantAudio = opts?.audio ?? true; // 기본 true: 동영상 녹화 시 오디오 포함 권장
+      const wantAudio = opts?.audio ?? false; // 기본 false: 타임랩스는 오디오 없이 녹화
       if (startingRef.current) return;
       if (isStreamLive(streamRef.current)) {
         if (!streamReady) setStreamReady(true);

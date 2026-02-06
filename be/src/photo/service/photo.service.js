@@ -1,5 +1,5 @@
 import path from 'path';
-import { savePhotoFile } from "../../utils/file.js";
+import { savePhotoFile, convertToTimelapse, UPLOADED_DIR } from "../../utils/file.js";
 import { printImageFile } from "../../utils/printer.js"
 import { v4 as uuidv4 } from 'uuid';
 import QRcode from 'qrcode';
@@ -18,19 +18,34 @@ export const submit = async (data) => {
   const photoPath = await savePhotoFile(photoFileName, data.photo);
   const filesToZip = [{ path: photoPath, name: photoFileName }];
 
-  // optional timelapse
+  // optional timelapse (with 6x speed encoding)
   if (data.timelapse) {
-    // log original file info for debugging
     console.log('[submit] timelapse originalname:', data.timelapse.originalname, 'mimetype:', data.timelapse.mimetype);
 
-    // Force timelapse file to be saved with .mp4 extension.
-    // NOTE: This only changes the filename/extension. If the uploaded bytes are not MP4,
-    // the file content will remain the original format (e.g., WebM). To convert formats, add ffmpeg conversion.
-    let vidExt = 'mp4';
+    // 원본 영상 임시 저장
+    const rawVideoFileName = `tmp_${uuidv4()}.webm`;
+    const rawVideoPath = await savePhotoFile(rawVideoFileName, data.timelapse);
 
-    const videoFileName = `${uuidv4()}.${vidExt}`;
-    const videoPath = await savePhotoFile(videoFileName, data.timelapse);
-    filesToZip.push({ path: videoPath, name: videoFileName });
+    // 타임랩스로 변환 (6배속)
+    const timelapseFileName = `${uuidv4()}.mp4`;
+    const timelapseFilePath = path.join(UPLOADED_DIR, timelapseFileName);
+
+    try {
+      await convertToTimelapse(rawVideoPath, timelapseFilePath, 6); // 6배속 인코딩
+      filesToZip.push({ path: timelapseFilePath, name: timelapseFileName });
+
+      // 임시 파일 삭제
+      try {
+        const { unlink } = await import('fs/promises');
+        await unlink(rawVideoPath);
+      } catch (e) {
+        console.warn('Failed to delete temp raw video file:', e);
+      }
+    } catch (err) {
+      console.error('Timelapse conversion failed, using original file:', err);
+      // 변환 실패 시 원본 파일을 그대로 사용
+      filesToZip.push({ path: rawVideoPath, name: timelapseFileName });
+    }
   }
 
   // create zip archive
