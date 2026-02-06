@@ -37,10 +37,14 @@ export const setupCommonError = (app) => {
       return next(err);
     }
     const statusCode = err.statusCode || 500;
-    res.status(statusCode).error({
-      errorCode: err.errorCode || "unknown",
-      reason: err.reason || err.message || null,
-      data: err.data || null,
+    res.status(statusCode).json({
+      resultType: "FAIL",
+      error: {
+        errorCode: err.errorCode || "unknown",
+        reason: err.reason || err.message || null,
+        data: err.data || null,
+      },
+      success: null,
     });
   });
 };
