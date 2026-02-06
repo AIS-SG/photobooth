@@ -105,7 +105,6 @@ export default function Photoselect() {
   const PAD = 24; // p-6
   // 프레임(2:3) 컨테이너의 실제 너비/높이
   const frameW = tileW > 0 ? tileW * 2 + GAP + PAD * 2 : 0;
-  const frameH = frameW > 0 ? Math.round(frameW * 1.5) : 0; // (참고용, 현재 미사용)
 
   return (
     <div className="relative w-screen h-screen bg-[#CFAB8D]">

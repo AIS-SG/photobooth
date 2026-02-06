@@ -56,6 +56,15 @@ export function useCountdown({ seconds, autostart = true, onExpire, onTick }: Op
     endAtRef.current = null;
   }, [seconds]);
 
+  const pause = useCallback(() => {
+    clear();
+  }, []);
+
+  const resume = useCallback((s?: number) => {
+    const current = s ?? sec;
+    start(current);
+  }, [sec, start]);
+
   useEffect(() => {
     if (autostart) start(seconds);
     return clear;
@@ -66,5 +75,5 @@ export function useCountdown({ seconds, autostart = true, onExpire, onTick }: Op
   // 디버깅: 렌더된 sec 값
   // useEffect(() => { console.log("[useCountdown] sec ->", sec); }, [sec]);
 
-  return { sec, start, reset };
+  return { sec, start, reset, pause, resume };
 }

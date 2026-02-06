@@ -1,7 +1,7 @@
 import { createBrowserRouter, RouterProvider } from "react-router-dom";
 import Start from "../pages/Start";
 import Count from "../pages/Count";
-import Photostart from "../pages/PhotoStart";
+import Photostart from "../pages/Photostart";
 import Phototime from "../pages/Phototime";
 import Frameselect from "../pages/Frameselect"; 
 import Loading from "../pages/Loading";

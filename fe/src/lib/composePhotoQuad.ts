@@ -20,7 +20,7 @@ function loadImage(src: string): Promise<HTMLImageElement> {
     // 외부 도메인만 crossOrigin 시도 (동일출처 번들 자산이면 불필요)
     if (/^https?:\/\//.test(src)) img.crossOrigin = "anonymous";
     img.onload = () => resolve(img);
-    img.onerror = (e) => reject(new Error(`Image load failed: ${src}`));
+    img.onerror = () => reject(new Error(`Image load failed: ${src}`));
     img.src = src;
   });
 }
@@ -110,8 +110,8 @@ export async function composeQuadImage(
       try {
         const img = await loadImage(src);
         drawImageCover(ctx, img, rect);
-      } catch (e) {
-        console.warn("slot image failed, draw guide:", e);
+      } catch (error) {
+        console.warn("slot image failed, draw guide:", error);
         if (drawEmptyGuide) {
           ctx.fillStyle = "rgba(0,0,0,0.08)";
           ctx.fillRect(rect.x, rect.y, rect.w, rect.h);

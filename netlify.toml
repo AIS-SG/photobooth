@@ -1,0 +1,18 @@
+[build]
+  base = "fe"
+  command = "npm run build"
+  publish = "dist"
+
+# SPA 라우팅: 모든 요청을 index.html로 리다이렉트
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
+
+# 프로덕션 환경 변수
+[context.production]
+  environment = { VITE_API_URL = "https://f2ba-175-192-28-148.ngrok-free.app" }
+
+# 배포 미리보기 환경 변수
+[context.deploy-preview]
+  environment = { VITE_API_URL = "https://f2ba-175-192-28-148.ngrok-free.app" }
