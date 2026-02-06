@@ -10,6 +10,12 @@ export type CapturedPhoto = {
   createdAt: number;
 };
 
+export type PhotoCorrections = {
+  brightness: number;
+  contrast: number;
+  saturation: number;
+};
+
 type PhotoState = {
   // 📷 사진 관련
   items: CapturedPhoto[];
@@ -17,6 +23,11 @@ type PhotoState = {
   setMany: (arr: Omit<CapturedPhoto, "id" | "createdAt">[]) => void;
   clear: () => void;
   remove: (id: string) => void;
+
+  // 🎨 사진 보정
+  corrections: PhotoCorrections;
+  setCorrections: (corrections: Partial<PhotoCorrections>) => void;
+  resetCorrections: () => void;
 
   // 🎥 녹화 영상 관련
   recordedVideo: Blob | null;
@@ -56,12 +67,25 @@ export const usePhotoStore = create<PhotoState>((set, get) => ({
     get().items.forEach((it) => URL.revokeObjectURL(it.url));
     // 🎥 영상 URL도 정리
     revokeURL(get().recordedVideoURL);
-    set({ items: [], recordedVideo: null, recordedVideoURL: null });
+    set({ items: [], recordedVideo: null, recordedVideoURL: null, corrections: { brightness: 1, contrast: 1, saturation: 1 } });
   },
   remove: (id) => {
     const it = get().items.find((x) => x.id === id);
     if (it) URL.revokeObjectURL(it.url);
     set((s) => ({ items: s.items.filter((x) => x.id !== id) }));
+  },
+
+  // ----------------
+  // 🎨 사진 보정
+  // ----------------
+  corrections: { brightness: 1, contrast: 1, saturation: 1 },
+  setCorrections: (partialCorrections) => {
+    set((s) => ({
+      corrections: { ...s.corrections, ...partialCorrections },
+    }));
+  },
+  resetCorrections: () => {
+    set({ corrections: { brightness: 1, contrast: 1, saturation: 1 } });
   },
 
   // ----------------

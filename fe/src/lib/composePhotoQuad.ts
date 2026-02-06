@@ -1,4 +1,5 @@
 import { uploadPhoto } from "./api";
+import { usePhotoStore } from "../stores/photoStore";
 
 type Rect = { x: number; y: number; w: number; h: number };
 
@@ -127,6 +128,19 @@ export async function composeQuadImage(
       ctx.strokeRect(rect.x + 1, rect.y + 1, rect.w - 2, rect.h - 2);
     }
   }
+
+  // 🎨 자동 보정값 적용 (store에서 가져옴)
+  const corrections = usePhotoStore.getState().corrections;
+  const filterString = `brightness(${corrections.brightness}) contrast(${corrections.contrast}) saturate(${corrections.saturation})`;
+  ctx.filter = filterString;
+  // 캔버스 전체에 필터를 적용하기 위해 자신의 컨텐츠를 다시 그리기
+  const tempCanvas = document.createElement("canvas");
+  tempCanvas.width = canvas.width;
+  tempCanvas.height = canvas.height;
+  const tempCtx = tempCanvas.getContext("2d")!;
+  tempCtx.drawImage(canvas, 0, 0);
+  ctx.drawImage(tempCanvas, 0, 0);
+  ctx.filter = "none";
 
   // ▲ 프레임(오버레이)
   if (params.frameImg) {

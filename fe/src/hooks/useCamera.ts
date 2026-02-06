@@ -1,6 +1,7 @@
 // src/hooks/useCamera.ts
 import { useCallback, useEffect, useRef, useState } from "react";
 import { usePhotoStore } from "../stores/photoStore";
+import { analyzeImageAndGetCorrections } from "../lib/imageAnalysis";
 
 function makeFilename(cut: number) {
   const now = new Date();
@@ -185,6 +186,10 @@ export function useCamera() {
     } else {
       ctx.drawImage(v, sx, sy, sw, sh, 0, 0, outW, outH);
     }
+
+    // 🎨 보정값 자동 분석 (Canvas 이미지 분석 기반)
+    const autoCorrections = analyzeImageAndGetCorrections(canvas);
+    usePhotoStore.getState().setCorrections(autoCorrections);
 
     const blob = await new Promise<Blob>((resolve) =>
       canvas.toBlob((b) => resolve(b!), "image/jpeg", 0.95)

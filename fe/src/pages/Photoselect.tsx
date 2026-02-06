@@ -47,6 +47,7 @@ export default function Photoselect() {
 
   const MAX = 4;
   const [slots, setSlots] = useState<(number | null)[]>(Array(MAX).fill(null));
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const selectedSet = useMemo(
     () => new Set(slots.filter((v): v is number => v !== null)),
     [slots]
@@ -146,7 +147,10 @@ export default function Photoselect() {
                       ref={idx === 0 ? firstTileRef : undefined}
                       className="relative w-full aspect-[2/3] border border-black bg-[#d9d9d9] overflow-hidden"
                     >
-                      <img src={src} className="absolute inset-0 w-full h-full object-cover" />
+                      <img
+                        src={src}
+                        className="absolute inset-0 w-full h-full object-cover"
+                      />
                       {selectedIndex !== -1 && (
                         <>
                           <span className="absolute top-2 left-2 text-sm font-bold bg-black/70 text-white rounded px-2 py-0.5">
@@ -198,7 +202,10 @@ export default function Photoselect() {
           <div className="absolute right-8 bottom-8 z-20">
             <button
               type="button"
+              disabled={isSubmitting}
               onClick={async () => {
+                if (isSubmitting) return;
+                setIsSubmitting(true);
                 try {
                   // 녹화된 타임랩스가 있으면 함께 업로드해서 ZIP으로 묶음
                   const recordedVideo = usePhotoStore.getState().recordedVideo;
@@ -211,14 +218,20 @@ export default function Photoselect() {
                   navigate("/Qrcode", { state: { qrCodeDataUrl: response.success.qrCodeDataUrl, downloadUrl: response.success.downloadUrl }, replace: true });
                 } catch (e) {
                   console.error(e);
+                  // 에러 발생 시 5초 후 다시 시도 가능하도록
+                  setTimeout(() => setIsSubmitting(false), 5000);
                 }
               }}
-              className="px-8 h-14 rounded-xl border border-black bg-[#cfab8d]
-                         text-[32px] font-['Hi_Melody'] text-black
-                         hover:brightness-95 transition"
+              className={`px-8 h-14 rounded-xl border border-black
+                         text-[32px] font-['Hi_Melody']
+                         transition ${
+                           isSubmitting
+                             ? "bg-gray-300 text-gray-600 cursor-not-allowed opacity-50"
+                             : "bg-[#cfab8d] text-black hover:brightness-95"
+                         }`}
               aria-label="다음 단계로 이동"
             >
-              Next
+              {isSubmitting ? "업로드 중..." : "Next"}
             </button>
           </div>
         )}
