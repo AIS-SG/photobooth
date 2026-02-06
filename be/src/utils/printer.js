@@ -34,14 +34,14 @@ export const printImageFile = async(file, copy) => {
      const { stdout: printerStatus } = await execPromise('lpstat -p');
      console.log('Available printers:', printerStatus);
 
-    //  if (!printerStatus || !printerStatus.includes('Canon_SELPHY_CP1500')) {
-    //    throw new Error('Canon_SELPHY_CP1500 not found. Please check your printer connection.');
-    //  }
+     if (!printerStatus || !printerStatus.includes('Canon_SELPHY_CP1500')) {
+       throw new Error('Canon_SELPHY_CP1500 not found. Please check your printer connection.');
+     }
 
-    //  console.log(`Printing ${tempPngPath}...`);
+     console.log(`Printing ${tempPngPath}...`);
      
-    //  // 터미널에서 작동한 명령어를 그대로 사용
-    //  await execPromise(`lp -d Canon_SELPHY_CP1500 -o media=4x6in -n ${copy} "${tempPngPath}"`);
+     // 터미널에서 작동한 명령어를 그대로 사용
+     await execPromise(`lp -d Canon_SELPHY_CP1500 -o media=4x6in -n ${copy} "${tempPngPath}"`);
 
      console.log('Print job sent successfully!');
    } catch (error) {

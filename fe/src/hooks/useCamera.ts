@@ -48,7 +48,7 @@ export function useCamera() {
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
 
   // 좌우 반전 상태
-  const [mirrored, setMirrored] = useState(false);
+  const [mirrored, setMirrored] = useState(true);
 
   const streamRef = useRef<MediaStream | null>(null);
   const startingRef = useRef(false);
